@@ -1,13 +1,10 @@
 package com.elaine.nsliyapplication.drawing;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-
-import java.util.ArrayList;
 
 /**
+ * Bezier curve class.
  * Created by Elaine on 10/24/2014.
  */
 public class Bezier {
@@ -41,10 +38,14 @@ public class Bezier {
 
     public void paintCurve(Canvas canvas, Paint paint){
         float widthDiff = endWidth - startWidth;
-        float t = 0.0f;
+        float t;
         int i = 1;
+        Paint circlePaint = new Paint(paint);
+        circlePaint.setStyle(Paint.Style.FILL);
 
-        canvas.drawPoint(point1.getX(),point1.getY(),paint);
+        paint.setStrokeWidth(startWidth);
+
+        canvas.drawCircle(point1.getX(), point1.getY(), startWidth/2, circlePaint);
 
         if(controlPoint == null){
             int numberOfPoints = (int) (point1.distanceTo(point2));
@@ -77,54 +78,9 @@ public class Bezier {
                 i++;
             }
         }
-        canvas.drawPoint(point2.getX(),point2.getY(),paint);
+
+        canvas.drawCircle(point2.getX(),point2.getY(),endWidth/2,circlePaint);
+
     }
 
-/*    public Bezier(Point prev2, Point prev1,Point current){
-        Point midPt1 = Point.midPointOf(prev2,prev1);
-        Point midPt2 = Point.midPointOf(prev1,current);
-
-        float distance = midPt1.distanceTo(midPt2);
-        int numberOfSegments = 32;
-
-        this.moveTo(prev2.getX(),prev2.getY());
-
-        float t = 0.0f;
-        for (int i=0;i<numberOfSegments;i++){
-            t = ((float)i)/numberOfSegments;
-            float tt = t*t;
-            float u = 1-t;
-            float uu = u*u;
-
-            float x = uu*prev2.getX();
-            x += 2*u*t*prev1.getX();
-            x += tt*current.getX();
-
-            float y = uu*prev2.getY();
-            y += 2*u*t*prev1.getY();
-            y += tt*current.getY();
-
-            this.lineTo(x,y);
-        }
-    }*/
-
-    public Point getPoint1(){
-        return point1;
-    }
-
-    public Point getControlPoint(){
-        return controlPoint;
-    }
-
-    public Point getPoint2(){
-        return point2;
-    }
-
-    public float getStartWidth(){
-        return startWidth;
-    }
-
-    public float getEndWidth(){
-        return endWidth;
-    }
 }
