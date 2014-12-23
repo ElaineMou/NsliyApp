@@ -150,18 +150,19 @@ public class DrawView extends View {
         // Save event's coordinates
         float eventX = event.getX();
         float eventY = event.getY();
+        int eventAction = event.getAction();
 
         if(characterBounds == null){
             characterBounds = new RectF(eventX, eventY, eventX, eventY);
         }
 
-        if(touchPoints.isEmpty() || touchPoints.get(touchPoints.size() - 1).distanceTo(new Point(eventX,eventY)) > 3f) {
+        if(touchPoints.isEmpty() || eventAction != MotionEvent.ACTION_MOVE ||
+                touchPoints.get(touchPoints.size() - 1).distanceTo(new Point(eventX,eventY)) > 3f) {
 
             // Depending on what type of event
-            switch (event.getAction()) {
+            switch (eventAction) {
                 // First touch down by user
                 case MotionEvent.ACTION_DOWN:
-                    Log.v("Down","Down");
                     // Create bitmap with transparency, new canvas to draw onto bitmap with.
                     currentStroke = Bitmap.createBitmap(getWidth(),getHeight(),Bitmap.Config.ARGB_8888);
                     canvas = new Canvas(currentStroke);
@@ -181,10 +182,8 @@ public class DrawView extends View {
                     break;
                 case MotionEvent.ACTION_MOVE:
                 case MotionEvent.ACTION_UP:
-                    Log.v("Move/Up", "Move or Up possible");
                     // If we have recorded a touch down before this move/touch up
                     if(!touchPoints.isEmpty()) {
-                        Log.v("Move/Up","Not empty touch points");
                         // Expand dirty rectangle to new event coordinates
                         expandRectToUpdate(eventX, eventY);
                         // Expand dirty rectangle to any previous touch points
@@ -220,35 +219,25 @@ public class DrawView extends View {
                             }
                         }
 
-                        // Add event point as last touch point
-                        touchPoints.add(new Point(eventX, eventY, event.getEventTime()));
-                        int size = touchPoints.size();
-                        // Add curve if we have reached an odd number of touch points
-                        if (size % 2 == 1) {
-                            float velocity = touchPoints.get(size - 1).
-                                    velocityFrom(touchPoints.get(size - 3));
-                            velocity = VELOCITY_FILTER_WEIGHT * velocity +
-                                    (1 - VELOCITY_FILTER_WEIGHT) * lastVelocity;
-                            float newWidth = strokeWidth(velocity);
-                            beziers.add(new Bezier(touchPoints.get(size - 3),
-                                    touchPoints.get(size - 2), touchPoints.get(size - 1),
-                                    strokeWidth, newWidth));
-                            beziers.get(beziers.size() - 1).paintCurve(canvas, paint);
-                            beziers.get(beziers.size() - 1).paintCurve(singleCanvas, paint);
-                            lastVelocity = velocity;
-                            strokeWidth = newWidth;
-                        }
-                        // Redraw the dirtied area
-                        invalidate(
-                                (int) (rectToUpdate.left - MAX_STROKE_WIDTH),
-                                (int) (rectToUpdate.top - MAX_STROKE_WIDTH),
-                                (int) (rectToUpdate.right + MAX_STROKE_WIDTH),
-                                (int) (rectToUpdate.bottom + MAX_STROKE_WIDTH)
-                        );
-                        // If moving
-                        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                            // Save last point if a curve to it has been completed
+                        // Add event point as last touch point if moving (avoid end blot)
+                        if(eventAction == MotionEvent.ACTION_MOVE) {
+                            touchPoints.add(new Point(eventX, eventY, event.getEventTime()));
+                            int size = touchPoints.size();
+                            // Add curve if we have reached an odd number of touch points
                             if (size % 2 == 1) {
+                                float velocity = touchPoints.get(size - 1).
+                                        velocityFrom(touchPoints.get(size - 3));
+                                velocity = VELOCITY_FILTER_WEIGHT * velocity +
+                                        (1 - VELOCITY_FILTER_WEIGHT) * lastVelocity;
+                                float newWidth = strokeWidth(velocity);
+                                beziers.add(new Bezier(touchPoints.get(size - 3),
+                                        touchPoints.get(size - 2), touchPoints.get(size - 1),
+                                        strokeWidth, newWidth));
+                                beziers.get(beziers.size() - 1).paintCurve(canvas, paint);
+                                beziers.get(beziers.size() - 1).paintCurve(singleCanvas, paint);
+                                lastVelocity = velocity;
+                                strokeWidth = newWidth;
+                                // Save last point if a curve to it has been completed
                                 Point pointToSave = touchPoints.get(size - 1);
                                 touchPoints = new ArrayList<Point>();
                                 touchPoints.add(pointToSave);
@@ -262,10 +251,9 @@ public class DrawView extends View {
                             }
                             // Expand stroke bounds to include this event
                             expandRectWithRect(lastStroke,rectToUpdate);
-                            Log.v("Moooooved.","Moove");
                         // If finishing stroke
-                        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                            Log.v("Upppppp","Upppp");
+                        } else if (eventAction == MotionEvent.ACTION_UP) {
+                            int size = touchPoints.size();
                             // Add linear line to final point if no curve has been made
                             if (size % 2 == 0) {
                                 float velocity = touchPoints.get(size - 1).
@@ -282,12 +270,16 @@ public class DrawView extends View {
                             }
                             // Expand stroke bounds to include this event
                             expandRectWithRect(lastStroke,rectToUpdate);
+                            // Find new stroke's boundaries within borders
+                            int x = (int) Math.max(lastStroke.left - MAX_STROKE_WIDTH, 0);
+                            int y = (int) Math.max(lastStroke.top - MAX_STROKE_WIDTH, 0);
+                            int newStrokeWidth = (int) Math.min(
+                                    lastStroke.width() + 2*MAX_STROKE_WIDTH, getWidth() - x);
+                            int newStrokeHeight = (int) Math.min(
+                                    lastStroke.height() + 2*MAX_STROKE_WIDTH, getHeight() - y);
                             // Excise stroke bounds from bitmap
                             Bitmap newStroke = Bitmap.createBitmap(currentStroke,
-                                    (int) (lastStroke.left - MAX_STROKE_WIDTH),
-                                    (int) (lastStroke.top - MAX_STROKE_WIDTH),
-                                    (int) (lastStroke.width() + 2*MAX_STROKE_WIDTH),
-                                    (int) (lastStroke.height() + 2*MAX_STROKE_WIDTH));
+                                    x,y, newStrokeWidth, newStrokeHeight);
                             // Add new smaller stroke bitmap
                             strokes.add(newStroke);
                             currentStroke = null;
@@ -295,6 +287,14 @@ public class DrawView extends View {
                             expandRectWithRect(characterBounds,lastStroke);
                             invalidate();
                         }
+
+                        // Redraw the dirtied area
+                        invalidate(
+                                (int) (rectToUpdate.left - MAX_STROKE_WIDTH),
+                                (int) (rectToUpdate.top - MAX_STROKE_WIDTH),
+                                (int) (rectToUpdate.right + MAX_STROKE_WIDTH),
+                                (int) (rectToUpdate.bottom + MAX_STROKE_WIDTH)
+                        );
                         // Clear dirty rectangle
                         relocateRectToUpdate(eventX, eventY);
                     }
