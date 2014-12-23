@@ -14,7 +14,7 @@ import android.view.View;
 import java.util.ArrayList;
 
 /**
- * Based on Eric Burke's SquareUp post.
+ * Inspired  Eric Burke's SquareUp post.
  * Created by Elaine on 10/23/2014.
  */
 public class DrawView extends View {
@@ -45,9 +45,13 @@ public class DrawView extends View {
      */
     private float lastVelocity = 0f;
     /**
-     * Coordinates of last touch down.
+     * Coordinates of last stroke.
      */
-    Point lastTouchDown;
+    RectF lastStroke = new RectF();
+    /**
+     * Bounds of character being written.
+     */
+    RectF characterBounds;
     /**
      * Paint used to draw.
      */
@@ -65,6 +69,10 @@ public class DrawView extends View {
      * Canvas used for drawing to single bitmap.
      */
     Canvas singleCanvas;
+    /**
+     * Current stroke image being drawn onto
+     */
+    Bitmap currentStroke;
     /**
      * Bitmap images being written to.
      */
@@ -107,6 +115,7 @@ public class DrawView extends View {
         touchPoints.clear();
         bitmap = null;
         strokes.clear();
+        characterBounds = null;
         invalidate();
     }
 
@@ -114,6 +123,10 @@ public class DrawView extends View {
     protected void onDraw(Canvas canvas){
         if(bitmap!=null) {
             canvas.drawBitmap(bitmap,0,0,null);
+        }
+
+        if(characterBounds!=null) {
+            canvas.drawRect(characterBounds, redPaint);
         }
     }
 
@@ -138,42 +151,60 @@ public class DrawView extends View {
         float eventX = event.getX();
         float eventY = event.getY();
 
+        if(characterBounds == null){
+            characterBounds = new RectF(eventX, eventY, eventX, eventY);
+        }
+
         if(touchPoints.isEmpty() || touchPoints.get(touchPoints.size() - 1).distanceTo(new Point(eventX,eventY)) > 3f) {
 
             // Depending on what type of event
             switch (event.getAction()) {
                 // First touch down by user
                 case MotionEvent.ACTION_DOWN:
+                    Log.v("Down","Down");
                     // Create bitmap with transparency, new canvas to draw onto bitmap with.
-                    Bitmap stroke = Bitmap.createBitmap(getWidth(),getHeight(),Bitmap.Config.ARGB_8888);
-                    canvas = new Canvas(stroke);
+                    currentStroke = Bitmap.createBitmap(getWidth(),getHeight(),Bitmap.Config.ARGB_8888);
+                    canvas = new Canvas(currentStroke);
                     canvas.drawColor(Color.TRANSPARENT);
-                    strokes.add(stroke);
 
+                    // Relocate/clear dirty rectangle and current stroke bounds
+                    relocateRect(lastStroke,eventX,eventY);
                     relocateRectToUpdate(eventX, eventY);
+                    // Initialize stroke width and velocity
                     lastVelocity = 0f;
                     strokeWidth = MIN_STROKE_WIDTH;
+
+                    // Empty touch points and add new event's coordinates
                     touchPoints = new ArrayList<Point>();
                     touchPoints.add(new Point(eventX, eventY, event.getEventTime()));
                     result = true;
                     break;
                 case MotionEvent.ACTION_MOVE:
                 case MotionEvent.ACTION_UP:
+                    Log.v("Move/Up", "Move or Up possible");
+                    // If we have recorded a touch down before this move/touch up
                     if(!touchPoints.isEmpty()) {
+                        Log.v("Move/Up","Not empty touch points");
+                        // Expand dirty rectangle to new event coordinates
                         expandRectToUpdate(eventX, eventY);
+                        // Expand dirty rectangle to any previous touch points
                         for (Point point : touchPoints) {
                             expandRectToUpdate(point.getX(), point.getY());
                         }
                         int historySize = event.getHistorySize();
 
+                        // Expand dirty rectangle to all points in history
                         for (int i = 0; i < historySize; i++) {
                             float historicalX = event.getHistoricalX(i);
                             float historicalY = event.getHistoricalY(i);
                             expandRectToUpdate(historicalX, historicalY);
+                            // Add all points in history to touch points
                             touchPoints.add(new Point(historicalX, historicalY, event.getHistoricalEventTime(i)));
 
+                            // When touchPoints has odd number of points
                             int size = touchPoints.size();
                             if (size % 2 == 1) {
+                                // Add Bezier curve between last three points,
                                 float velocity = touchPoints.get(size - 1).
                                         velocityFrom(touchPoints.get(size - 3));
                                 velocity = VELOCITY_FILTER_WEIGHT * velocity +
@@ -189,8 +220,10 @@ public class DrawView extends View {
                             }
                         }
 
+                        // Add event point as last touch point
                         touchPoints.add(new Point(eventX, eventY, event.getEventTime()));
                         int size = touchPoints.size();
+                        // Add curve if we have reached an odd number of touch points
                         if (size % 2 == 1) {
                             float velocity = touchPoints.get(size - 1).
                                     velocityFrom(touchPoints.get(size - 3));
@@ -205,19 +238,21 @@ public class DrawView extends View {
                             lastVelocity = velocity;
                             strokeWidth = newWidth;
                         }
-
+                        // Redraw the dirtied area
                         invalidate(
                                 (int) (rectToUpdate.left - MAX_STROKE_WIDTH),
                                 (int) (rectToUpdate.top - MAX_STROKE_WIDTH),
                                 (int) (rectToUpdate.right + MAX_STROKE_WIDTH),
                                 (int) (rectToUpdate.bottom + MAX_STROKE_WIDTH)
                         );
-
+                        // If moving
                         if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                            // Save last point if a curve to it has been completed
                             if (size % 2 == 1) {
                                 Point pointToSave = touchPoints.get(size - 1);
                                 touchPoints = new ArrayList<Point>();
                                 touchPoints.add(pointToSave);
+                            // Save last two points if no curve has been made through them
                             } else if (size % 2 == 0) {
                                 Point point1 = touchPoints.get(size - 2);
                                 Point point2 = touchPoints.get(size - 1);
@@ -225,7 +260,13 @@ public class DrawView extends View {
                                 touchPoints.add(point1);
                                 touchPoints.add(point2);
                             }
+                            // Expand stroke bounds to include this event
+                            expandRectWithRect(lastStroke,rectToUpdate);
+                            Log.v("Moooooved.","Moove");
+                        // If finishing stroke
                         } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                            Log.v("Upppppp","Upppp");
+                            // Add linear line to final point if no curve has been made
                             if (size % 2 == 0) {
                                 float velocity = touchPoints.get(size - 1).
                                         velocityFrom(touchPoints.get(size - 2));
@@ -239,7 +280,22 @@ public class DrawView extends View {
                                 lastVelocity = velocity;
                                 strokeWidth = newWidth;
                             }
+                            // Expand stroke bounds to include this event
+                            expandRectWithRect(lastStroke,rectToUpdate);
+                            // Excise stroke bounds from bitmap
+                            Bitmap newStroke = Bitmap.createBitmap(currentStroke,
+                                    (int) (lastStroke.left - MAX_STROKE_WIDTH),
+                                    (int) (lastStroke.top - MAX_STROKE_WIDTH),
+                                    (int) (lastStroke.width() + 2*MAX_STROKE_WIDTH),
+                                    (int) (lastStroke.height() + 2*MAX_STROKE_WIDTH));
+                            // Add new smaller stroke bitmap
+                            strokes.add(newStroke);
+                            currentStroke = null;
+                            // Expand character bounds to include this event
+                            expandRectWithRect(characterBounds,lastStroke);
+                            invalidate();
                         }
+                        // Clear dirty rectangle
                         relocateRectToUpdate(eventX, eventY);
                     }
                     result = true;
@@ -285,8 +341,6 @@ public class DrawView extends View {
         } else if (y > rectToUpdate.bottom){
             rectToUpdate.bottom = y;
         }
-
-        Log.v("expandToRect",rectToUpdate.toString());
     }
 
     /**
@@ -299,6 +353,38 @@ public class DrawView extends View {
         rectToUpdate.right = x;
         rectToUpdate.top = y;
         rectToUpdate.bottom = y;
-        Log.v("relocateRect",rectToUpdate.toString());
+    }
+
+    /**
+     * Expands first rectangle to include 2nd rectangle's bounds.
+     * @param rectangle1 - Rectangle to be expanded.
+     * @param rectangle2 - Rectangle used as input.
+     */
+    private void expandRectWithRect(RectF rectangle1, RectF rectangle2){
+        if(rectangle2.left < rectangle1.left) {
+            rectangle1.left = rectangle2.left;
+        }
+        if (rectangle2.right > rectangle1.right){
+            rectangle1.right = rectangle2.right;
+        }
+        if(rectangle2.top < rectangle1.top) {
+            rectangle1.top = rectangle2.top;
+        }
+        if (rectangle2.bottom > rectangle1.bottom){
+            rectangle1.bottom = rectangle2.bottom;
+        }
+    }
+
+    /**
+     * Moves rectangle to coordinates with no area.
+     * @param rectangle - Rectangle to be relocated.
+     * @param x - X coordinate to move to
+     * @param y - Y coordinate to move to
+     */
+    private void relocateRect(RectF rectangle, float x, float y){
+        rectangle.left = x;
+        rectangle.right = x;
+        rectangle.top = y;
+        rectangle.bottom = y;
     }
 }
