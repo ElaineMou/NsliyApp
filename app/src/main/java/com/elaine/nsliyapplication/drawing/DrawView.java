@@ -410,32 +410,42 @@ public class DrawView extends View {
     }
 
     public void undo() {
-        //Remove last stroke from memory
-        strokes.remove(strokes.size() - 1);
-        rawStrokeBounds.remove(rawStrokeBounds.size() - 1);
-        offsetsFromCorner.remove(offsetsFromCorner.size() - 1);
-        touchPoints.clear();
-
         // If any set is empty, clear all data of previous strokes.
-        if(strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()) {
+        if(strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()){
             displayBitmap = null;
             rawCharacterBounds = null;
 
             strokes.clear();
             rawStrokeBounds.clear();
             offsetsFromCorner.clear();
-        }else { // If there are still strokes on the screen
-            // Recreate displayBitmap with transparency, new canvas to draw onto displayBitmap with.
-            displayBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-            displayCanvas = new Canvas(displayBitmap);
-            displayCanvas.drawColor(Color.TRANSPARENT);
+        } else {
+            //Remove last stroke from memory
+            strokes.remove(strokes.size() - 1);
+            rawStrokeBounds.remove(rawStrokeBounds.size() - 1);
+            offsetsFromCorner.remove(offsetsFromCorner.size() - 1);
+            touchPoints.clear();
 
-            // Relocate raw character bounds, then redraw screen/expand bounds through all previous
-            relocateRect(rawCharacterBounds, rawStrokeBounds.get(0).left,rawStrokeBounds.get(0).top);
-            for (int i = 0; i < strokes.size(); i++) {
-                displayCanvas.drawBitmap(strokes.get(i),
-                        offsetsFromCorner.get(i).getX(), offsetsFromCorner.get(i).getY(), null);
-                expandRectWithRect(rawCharacterBounds, rawStrokeBounds.get(i));
+            // If any set is newly empty, clear all data of previous strokes.
+            if (strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()) {
+                displayBitmap = null;
+                rawCharacterBounds = null;
+
+                strokes.clear();
+                rawStrokeBounds.clear();
+                offsetsFromCorner.clear();
+            } else { // If there are still strokes on the screen
+                // Recreate displayBitmap with transparency, new canvas to draw onto displayBitmap with.
+                displayBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                displayCanvas = new Canvas(displayBitmap);
+                displayCanvas.drawColor(Color.TRANSPARENT);
+
+                // Relocate raw character bounds, then redraw screen/expand bounds through all previous
+                relocateRect(rawCharacterBounds, rawStrokeBounds.get(0).left, rawStrokeBounds.get(0).top);
+                for (int i = 0; i < strokes.size(); i++) {
+                    displayCanvas.drawBitmap(strokes.get(i),
+                            offsetsFromCorner.get(i).getX(), offsetsFromCorner.get(i).getY(), null);
+                    expandRectWithRect(rawCharacterBounds, rawStrokeBounds.get(i));
+                }
             }
         }
 
