@@ -8,13 +8,17 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 /**
- * Inspired  Eric Burke's SquareUp post.
+ * Inspired by Eric Burke's SquareUp post.
  * Created by Elaine on 10/23/2014.
  */
 public class DrawView extends View {
@@ -450,5 +454,54 @@ public class DrawView extends View {
         }
 
         invalidate();
+    }
+
+    public void saveCharacter(Context context){
+        boolean success = false;
+        if(isExternalStorageWritable()) { // If we can write to external storage
+            // Check there are strokes and data matches up
+            if (strokes.size() > 0 && strokes.size() == offsetsFromCorner.size()) {
+                // Get the directory for the app's private pictures directory.
+                File directory = new File(context.getExternalFilesDir(
+                        Environment.DIRECTORY_PICTURES), "characters");
+                if (!directory.exists()) {
+                    if (!directory.mkdir()) {
+                        Log.v("saveCharacter", "Directory not created");
+                        return;
+                    }
+                }
+                // For each stroke to send
+                int size = strokes.size();
+                for(int i=0;i<size;i++) {
+                    // Generate a numbered name
+                    String fileName = "Image-" + i + ".png";
+                    File imageFile = new File(directory, fileName);
+                    if (imageFile.exists()){
+                        imageFile.delete();
+                    }
+                    // Compress and send stroke image to file
+                    try {
+                        FileOutputStream out = new FileOutputStream(imageFile);
+                        strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
+                        out.flush();
+                        out.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                success = true;
+            }
+        }
+        // Notify user if we could save to external storage
+        CharSequence text = "";
+        if(success) {
+            text = "Successfully added character.";
+        } else {
+            text = "Failed to save.";
+        }
+
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 }

@@ -15,7 +15,6 @@ public class DrawActivity extends Activity {
         setContentView(R.layout.activity_draw);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -34,6 +33,8 @@ public class DrawActivity extends Activity {
             return true;
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
+        } else if (id == R.id.action_save){
+            ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this);
         }
         return super.onOptionsItemSelected(item);
     }
