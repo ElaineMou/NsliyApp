@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -16,6 +15,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Inspired by Eric Burke's SquareUp post.
@@ -23,6 +23,7 @@ import java.util.ArrayList;
  */
 public class DrawView extends View {
 
+    public static final String OFFSET_FILE_NAME = "offsets.txt";
     /**
      * Minimum width for ink strokes.
      */
@@ -462,34 +463,66 @@ public class DrawView extends View {
             // Check there are strokes and data matches up
             if (strokes.size() > 0 && strokes.size() == offsetsFromCorner.size()) {
                 // Get the directory for the app's private pictures directory.
-                File directory = new File(context.getExternalFilesDir(
-                        Environment.DIRECTORY_PICTURES), "characters");
-                if (!directory.exists()) {
-                    if (!directory.mkdir()) {
-                        Log.v("saveCharacter", "Directory not created");
-                        return;
+                int n;
+                Random random = new Random();
+                String directoryName;
+                File directory;
+                // Guarantee a unique folder for new character
+                do{
+                    n = random.nextInt(1000);
+                    directoryName = "character-" + n;
+                    directory = new File(context.getExternalFilesDir(
+                            Environment.DIRECTORY_PICTURES), directoryName);
+                }while(directory.exists());
+
+                // Create directory, quit if not possible
+                if (directory.mkdir()) {
+                    success = true;
+                    // For each stroke to send
+                    int size = strokes.size();
+                    for (int i = 0; i < size; i++) {
+                        // Generate a numbered name
+                        String fileName = "stroke-" + i + ".png";
+                        File imageFile = new File(directory, fileName);
+                        if (imageFile.exists()) {
+                            imageFile.delete();
+                        }
+                        // Compress and send stroke image to file
+                        try {
+                            FileOutputStream out = new FileOutputStream(imageFile);
+                            strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
+                            out.flush();
+                            out.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            success = false;
+                        }
                     }
-                }
-                // For each stroke to send
-                int size = strokes.size();
-                for(int i=0;i<size;i++) {
-                    // Generate a numbered name
-                    String fileName = "Image-" + i + ".png";
-                    File imageFile = new File(directory, fileName);
-                    if (imageFile.exists()){
-                        imageFile.delete();
+
+                    //TODO: Account for character's bounds relative to these
+                    StringBuilder strBuilder = new StringBuilder();
+                    size = offsetsFromCorner.size();
+                    for(int i=0;i<size;i++){
+                        Point coordinates = offsetsFromCorner.get(i);
+                        strBuilder.append((int) coordinates.getX()).append(",")
+                                .append((int) coordinates.getY()).append(";");
                     }
-                    // Compress and send stroke image to file
+
+                    // Create new text file
+                    File textFile = new File(directory,OFFSET_FILE_NAME);
+                    if(textFile.exists()){
+                        textFile.delete();
+                    }
+                    FileOutputStream outputStream;
                     try {
-                        FileOutputStream out = new FileOutputStream(imageFile);
-                        strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
-                        out.flush();
-                        out.close();
+                        outputStream = new FileOutputStream(textFile);
+                        outputStream.write(strBuilder.toString().getBytes());
+                        outputStream.close();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 }
-                success = true;
             }
         }
         // Notify user if we could save to external storage
