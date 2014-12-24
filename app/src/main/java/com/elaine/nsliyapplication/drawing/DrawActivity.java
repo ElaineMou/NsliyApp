@@ -13,8 +13,6 @@ public class DrawActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
-        DrawFragment drawFragment = new DrawFragment();
-        getFragmentManager().beginTransaction().replace(R.id.draw_fragment,drawFragment).commit();
     }
 
 
@@ -32,8 +30,10 @@ public class DrawActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_clear) {
-            ((DrawFragment) getFragmentManager().findFragmentById(R.id.draw_fragment)).clear();
+            ( (DrawView) findViewById(R.id.draw_view) ).clear();
             return true;
+        } else if (id == R.id.action_undo){
+            ( (DrawView) findViewById(R.id.draw_view) ).undo();
         }
         return super.onOptionsItemSelected(item);
     }

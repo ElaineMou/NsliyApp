@@ -2,9 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.elaine.nsliyapplication" >
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/testicon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -21,7 +22,8 @@
         </activity>
         <activity
             android:name=".drawing.DrawActivity"
-            android:label="@string/title_activity_draw" >
+            android:label="@string/title_activity_draw"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
