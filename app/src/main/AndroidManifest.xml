@@ -9,26 +9,24 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".PageListActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name=".PageDetailActivity"
-            android:label="@string/title_page_detail"
-            android:parentActivityName=".PageListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".PageListActivity" />
-        </activity>
-        <activity
-            android:name=".drawing.DrawActivity"
-            android:label="@string/title_activity_draw"
+            android:name=".MainMenuActivity"
+            android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".drawing.DrawActivity"
+            android:label="@string/title_activity_draw"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainMenuActivity" />
+        </activity>
     </application>
 
 </manifest>
+
+    <!-- Logo font is Wolf in the City by Maelle K. Sounds from chinese-lessons.com -->
