@@ -23,7 +23,14 @@ import java.util.Random;
  */
 public class DrawView extends View {
 
+    /**
+     * Name of text file for offsets data
+     */
     public static final String OFFSET_FILE_NAME = "offsets.txt";
+    /**
+     * Name of display bitmap file to show complete character.
+     */
+    public static final String DISPLAY_IMAGE_NAME = "display.png";
     /**
      * Minimum width for ink strokes.
      */
@@ -138,10 +145,6 @@ public class DrawView extends View {
     protected void onDraw(Canvas canvas){
         if(displayBitmap !=null) {
             canvas.drawBitmap(displayBitmap,0,0,null);
-        }
-
-        if(rawCharacterBounds !=null) {
-            canvas.drawRect(rawCharacterBounds, redPaint);
         }
     }
 
@@ -457,8 +460,13 @@ public class DrawView extends View {
         invalidate();
     }
 
+    /**
+     * Saves current character and strokes to file.
+     * @param context - Activity passed in to get directory
+     */
     public void saveCharacter(Context context){
         boolean success = false;
+        File directory = null;
         if(isExternalStorageWritable()) { // If we can write to external storage
             // Check there are strokes and data matches up
             if (strokes.size() > 0 && strokes.size() == offsetsFromCorner.size()) {
@@ -466,7 +474,6 @@ public class DrawView extends View {
                 int n;
                 Random random = new Random();
                 String directoryName;
-                File directory;
                 // Guarantee a unique folder for new character
                 do{
                     n = random.nextInt(1000);
@@ -491,7 +498,6 @@ public class DrawView extends View {
                         try {
                             FileOutputStream out = new FileOutputStream(imageFile);
                             strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
-                            out.flush();
                             out.close();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -499,13 +505,45 @@ public class DrawView extends View {
                         }
                     }
 
-                    //TODO: Account for character's bounds relative to these
+                    RectF realCharacterBounds = new RectF();
+
+                    // Find new character's boundaries within borders
+                    realCharacterBounds.left = Math.max(
+                            rawCharacterBounds.left - MAX_STROKE_WIDTH, 0);
+                    realCharacterBounds.top = Math.max(
+                            rawCharacterBounds.top - MAX_STROKE_WIDTH, 0);
+                    realCharacterBounds.right = Math.min(
+                            rawCharacterBounds.right + MAX_STROKE_WIDTH, getWidth() );
+                    realCharacterBounds.bottom = Math.min(
+                            rawCharacterBounds.bottom + MAX_STROKE_WIDTH, getHeight() );
+                    // Excise character from screen bitmap
+                    Bitmap characterImage = Bitmap.createBitmap(displayBitmap,
+                            (int) realCharacterBounds.left, (int) realCharacterBounds.top,
+                            (int) realCharacterBounds.width(), (int) realCharacterBounds.height());
+
+                    // Make file location for character image
+                    File imageFile = new File(directory, DISPLAY_IMAGE_NAME);
+                    if (imageFile.exists()) {
+                        imageFile.delete();
+                    }
+                    // Compress and send image to file
+                    try {
+                        FileOutputStream out = new FileOutputStream(imageFile);
+                        characterImage.compress(Bitmap.CompressFormat.PNG, 90, out);
+                        out.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        success = false;
+                    }
+                    // Build text line of coordinates from character's top left corner
                     StringBuilder strBuilder = new StringBuilder();
                     size = offsetsFromCorner.size();
                     for(int i=0;i<size;i++){
                         Point coordinates = offsetsFromCorner.get(i);
-                        strBuilder.append((int) coordinates.getX()).append(",")
-                                .append((int) coordinates.getY()).append(";");
+                        strBuilder.append((int) (coordinates.getX() - realCharacterBounds.left) )
+                                .append(",")
+                                .append((int) (coordinates.getY() - realCharacterBounds.top) )
+                                .append(";");
                     }
 
                     // Create new text file
@@ -520,6 +558,7 @@ public class DrawView extends View {
                         outputStream.close();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        success = false;
                     }
 
                 }
@@ -531,6 +570,10 @@ public class DrawView extends View {
             text = "Successfully added character.";
         } else {
             text = "Failed to save.";
+            // Clear the folder if incomplete
+            if(directory!=null && directory.exists()){
+                directory.delete();
+            }
         }
 
         int duration = Toast.LENGTH_SHORT;
