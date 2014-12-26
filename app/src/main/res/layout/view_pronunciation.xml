@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pale_green"
+    >
+    <TextView
+        android:id="@+id/syllable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/dark_green"
+        android:textSize="@dimen/pronunciation_font_size"
+        android:layout_margin="@dimen/pronunciation_margin"/>
+    <TextView
+        android:id="@+id/tone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/dark_green"
+        android:textSize="@dimen/pronunciation_font_size"
+        android:layout_margin="@dimen/pronunciation_margin"/>
+    <ImageView
+        android:layout_width="@dimen/delete_button_size"
+        android:layout_height="@dimen/delete_button_size"
+        android:layout_margin="@dimen/pronunciation_margin"
+        android:src="@drawable/xmark"/>
+
+</LinearLayout>

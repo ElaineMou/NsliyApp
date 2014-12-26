@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#83d17b">
+    android:background="#8bcb81">
 
     <ImageView
         android:layout_width="match_parent"
@@ -13,18 +13,18 @@
         android:src="@drawable/menuimage"
         android:scaleType="fitStart"
         android:adjustViewBounds="true"/>
+
     <Button
         android:id="@+id/draw_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Draw a New Character"/>
+        android:textSize="@dimen/main_menu_button_size"
+        android:text="@string/draw_button"/>
     <Button
         android:id="@+id/view_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View Characters"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:textSize="@dimen/main_menu_button_size"
+        android:text="@string/view_button"/>
 
 </LinearLayout>

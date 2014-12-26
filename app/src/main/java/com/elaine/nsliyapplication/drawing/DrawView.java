@@ -126,6 +126,8 @@ public class DrawView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeWidth(5f);
 
+        setBackgroundColor(Color.WHITE);
+
         redPaint = new Paint(paint);
         redPaint.setColor(Color.RED);
     }
