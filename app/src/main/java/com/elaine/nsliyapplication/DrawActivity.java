@@ -6,6 +6,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.elaine.nsliyapplication.input.DrawView;
+import com.elaine.nsliyapplication.input.SyllableEntryView;
+
+import java.io.File;
 
 public class DrawActivity extends Activity {
 
@@ -34,7 +37,10 @@ public class DrawActivity extends Activity {
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
         } else if (id == R.id.action_save){
-            ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this);
+            File directory = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this);
+            if(directory!=null){
+                ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
+            }
         }
         return super.onOptionsItemSelected(item);
     }

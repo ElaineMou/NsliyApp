@@ -15,6 +15,8 @@ import android.widget.RadioGroup;
 
 import com.elaine.nsliyapplication.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -24,6 +26,7 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         View.OnClickListener {
 
     private static final int MAX_NUM_PRONUNCIATIONS = 6;
+    private static final String SYLLABLE_FILE_NAME = "pronunciations.txt";
     ArrayList<Pronunciation> pronunciations = new ArrayList<Pronunciation>();
 
     public SyllableEntryView(Context context) {
@@ -116,6 +119,34 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                     ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
                 }
                 break;
+        }
+    }
+
+    public void saveSyllables(File directory){
+        if(directory.exists()){
+            boolean success = true;
+            StringBuilder strBuilder = new StringBuilder();
+            for(Pronunciation pronunciation: pronunciations){
+                strBuilder.append(pronunciation.syllable).append(pronunciation.tone.toString()).
+                        append(",");
+            }
+            // Create new text file
+            File textFile = new File(directory, SYLLABLE_FILE_NAME);
+            if (textFile.exists()) {
+                textFile.delete();
+            }
+            FileOutputStream outputStream;
+            try {
+                outputStream = new FileOutputStream(textFile);
+                outputStream.write(strBuilder.toString().getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
+            if(!success){
+                textFile.delete();
+            }
         }
     }
 }

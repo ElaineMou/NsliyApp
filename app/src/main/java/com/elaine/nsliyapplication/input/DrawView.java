@@ -466,121 +466,125 @@ public class DrawView extends View {
      * Saves current character and strokes to file.
      * @param context - Activity passed in to get directory
      */
-    public void saveCharacter(Context context){
+    public File saveCharacter(Context context){
         boolean success = false;
         File directory = null;
-        if(isExternalStorageWritable()) { // If we can write to external storage
-            // Check there are strokes and data matches up
-            if (strokes.size() > 0 && strokes.size() == offsetsFromCorner.size()) {
-                // Get the directory for the app's private pictures directory.
-                int n;
-                Random random = new Random();
-                String directoryName;
-                // Guarantee a unique folder for new character
-                do{
-                    n = random.nextInt(1000);
-                    directoryName = "character-" + n;
-                    directory = new File(context.getExternalFilesDir(
-                            Environment.DIRECTORY_PICTURES), directoryName);
-                }while(directory.exists());
+        if(strokes.size() > 0) { // If we can write to external storage
+            if(isExternalStorageWritable()) {
+                // Check there are strokes and data matches up
+                if (strokes.size() == offsetsFromCorner.size()) {
+                    // Get the directory for the app's private pictures directory.
+                    int n=0;
+                    Random random = new Random();
+                    String directoryName;
+                    // Guarantee a unique folder for new character
+                    do {
+                        n += random.nextInt(100);
+                        directoryName = "character-" + n;
+                        directory = new File(context.getExternalFilesDir(
+                                Environment.DIRECTORY_PICTURES), directoryName);
+                    } while (directory.exists());
 
-                // Create directory, quit if not possible
-                if (directory.mkdir()) {
-                    success = true;
-                    // For each stroke to send
-                    int size = strokes.size();
-                    for (int i = 0; i < size; i++) {
-                        // Generate a numbered name
-                        String fileName = "stroke-" + i + ".png";
-                        File imageFile = new File(directory, fileName);
+                    // Create directory, quit if not possible
+                    if (directory.mkdir()) {
+                        success = true;
+                        // For each stroke to send
+                        int size = strokes.size();
+                        for (int i = 0; i < size; i++) {
+                            // Generate a numbered name
+                            String fileName = "stroke-" + i + ".png";
+                            File imageFile = new File(directory, fileName);
+                            if (imageFile.exists()) {
+                                imageFile.delete();
+                            }
+                            // Compress and send stroke image to file
+                            try {
+                                FileOutputStream out = new FileOutputStream(imageFile);
+                                strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
+                                out.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                success = false;
+                            }
+                        }
+
+                        RectF realCharacterBounds = new RectF();
+
+                        // Find new character's boundaries within borders
+                        realCharacterBounds.left = Math.max(
+                                rawCharacterBounds.left - MAX_STROKE_WIDTH, 0);
+                        realCharacterBounds.top = Math.max(
+                                rawCharacterBounds.top - MAX_STROKE_WIDTH, 0);
+                        realCharacterBounds.right = Math.min(
+                                rawCharacterBounds.right + MAX_STROKE_WIDTH, getWidth());
+                        realCharacterBounds.bottom = Math.min(
+                                rawCharacterBounds.bottom + MAX_STROKE_WIDTH, getHeight());
+                        // Excise character from screen bitmap
+                        Bitmap characterImage = Bitmap.createBitmap(displayBitmap,
+                                (int) realCharacterBounds.left, (int) realCharacterBounds.top,
+                                (int) realCharacterBounds.width(), (int) realCharacterBounds.height());
+
+                        // Make file location for character image
+                        File imageFile = new File(directory, DISPLAY_IMAGE_NAME);
                         if (imageFile.exists()) {
                             imageFile.delete();
                         }
-                        // Compress and send stroke image to file
+                        // Compress and send image to file
                         try {
                             FileOutputStream out = new FileOutputStream(imageFile);
-                            strokes.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
+                            characterImage.compress(Bitmap.CompressFormat.PNG, 90, out);
                             out.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                             success = false;
                         }
-                    }
+                        // Build text line of coordinates from character's top left corner
+                        StringBuilder strBuilder = new StringBuilder();
+                        size = offsetsFromCorner.size();
+                        for (int i = 0; i < size; i++) {
+                            Point coordinates = offsetsFromCorner.get(i);
+                            strBuilder.append((int) (coordinates.getX() - realCharacterBounds.left))
+                                    .append(",")
+                                    .append((int) (coordinates.getY() - realCharacterBounds.top))
+                                    .append(";");
+                        }
 
-                    RectF realCharacterBounds = new RectF();
+                        // Create new text file
+                        File textFile = new File(directory, OFFSET_FILE_NAME);
+                        if (textFile.exists()) {
+                            textFile.delete();
+                        }
+                        FileOutputStream outputStream;
+                        try {
+                            outputStream = new FileOutputStream(textFile);
+                            outputStream.write(strBuilder.toString().getBytes());
+                            outputStream.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            success = false;
+                        }
 
-                    // Find new character's boundaries within borders
-                    realCharacterBounds.left = Math.max(
-                            rawCharacterBounds.left - MAX_STROKE_WIDTH, 0);
-                    realCharacterBounds.top = Math.max(
-                            rawCharacterBounds.top - MAX_STROKE_WIDTH, 0);
-                    realCharacterBounds.right = Math.min(
-                            rawCharacterBounds.right + MAX_STROKE_WIDTH, getWidth() );
-                    realCharacterBounds.bottom = Math.min(
-                            rawCharacterBounds.bottom + MAX_STROKE_WIDTH, getHeight() );
-                    // Excise character from screen bitmap
-                    Bitmap characterImage = Bitmap.createBitmap(displayBitmap,
-                            (int) realCharacterBounds.left, (int) realCharacterBounds.top,
-                            (int) realCharacterBounds.width(), (int) realCharacterBounds.height());
-
-                    // Make file location for character image
-                    File imageFile = new File(directory, DISPLAY_IMAGE_NAME);
-                    if (imageFile.exists()) {
-                        imageFile.delete();
                     }
-                    // Compress and send image to file
-                    try {
-                        FileOutputStream out = new FileOutputStream(imageFile);
-                        characterImage.compress(Bitmap.CompressFormat.PNG, 90, out);
-                        out.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        success = false;
-                    }
-                    // Build text line of coordinates from character's top left corner
-                    StringBuilder strBuilder = new StringBuilder();
-                    size = offsetsFromCorner.size();
-                    for(int i=0;i<size;i++){
-                        Point coordinates = offsetsFromCorner.get(i);
-                        strBuilder.append((int) (coordinates.getX() - realCharacterBounds.left) )
-                                .append(",")
-                                .append((int) (coordinates.getY() - realCharacterBounds.top) )
-                                .append(";");
-                    }
-
-                    // Create new text file
-                    File textFile = new File(directory,OFFSET_FILE_NAME);
-                    if(textFile.exists()){
-                        textFile.delete();
-                    }
-                    FileOutputStream outputStream;
-                    try {
-                        outputStream = new FileOutputStream(textFile);
-                        outputStream.write(strBuilder.toString().getBytes());
-                        outputStream.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        success = false;
-                    }
-
                 }
             }
-        }
-        // Notify user if we could save to external storage
-        CharSequence text = "";
-        if(success) {
-            text = "Successfully added character.";
-        } else {
-            text = "Failed to save.";
-            // Clear the folder if incomplete
-            if(directory!=null && directory.exists()){
-                directory.delete();
+            // Notify user if we could save to external storage
+            CharSequence text = "";
+            if(success) {
+                text = "Successfully added character.";
+            } else {
+                text = "Failed to save.";
+                // Clear the folder if incomplete
+                if(directory!=null && directory.exists()){
+                    directory.delete();
+                }
+                directory = null;
             }
-        }
 
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+        return directory;
     }
 
     @Override
