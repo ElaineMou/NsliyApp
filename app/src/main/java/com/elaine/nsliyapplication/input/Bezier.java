@@ -1,4 +1,4 @@
-package com.elaine.nsliyapplication.drawing;
+package com.elaine.nsliyapplication.input;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

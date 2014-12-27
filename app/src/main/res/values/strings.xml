@@ -20,5 +20,7 @@
     <string name="unknown_tone">\?\?</string>
     <string name="draw_button">Draw a New Character</string>
     <string name="view_button">View Characters</string>
+    <string name="save_button">Save</string>
+    <string name="add_button">Add</string>
 
 </resources>

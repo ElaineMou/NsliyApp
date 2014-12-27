@@ -3,15 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.elaine.nsliyapplication.drawing.DrawFragment">
+    tools:context="com.elaine.nsliyapplication.input.DrawFragment">
 
-    <com.elaine.nsliyapplication.drawing.DrawView
+    <com.elaine.nsliyapplication.input.DrawView
         android:id="@+id/draw_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"/>
+        android:layout_weight="1"/>
 
-    <com.elaine.nsliyapplication.drawing.DataEntryView
+    <com.elaine.nsliyapplication.input.SyllableEntryView
+        android:id="@+id/pronunciation_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>

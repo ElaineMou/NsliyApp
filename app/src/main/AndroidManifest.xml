@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".drawing.DrawActivity"
+            android:name=".DrawActivity"
             android:label="@string/title_activity_draw"
             android:screenOrientation="portrait">
             <meta-data

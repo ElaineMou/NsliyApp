@@ -1,4 +1,4 @@
-package com.elaine.nsliyapplication.drawing;
+package com.elaine.nsliyapplication.input;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -581,5 +581,30 @@ public class DrawView extends View {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width = widthSize;
+        int height;
+
+        //Measure Height
+        if (heightMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            height = Math.min(width, heightSize);
+        } else {
+            //Be whatever you want
+            height = width;
+        }
+
+        setMeasuredDimension(width,height);
     }
 }

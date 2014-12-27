@@ -1,4 +1,4 @@
-package com.elaine.nsliyapplication.drawing;
+package com.elaine.nsliyapplication.input;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,11 +6,9 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.elaine.nsliyapplication.Pronunciation;
 import com.elaine.nsliyapplication.R;
 
 /**
- * Meant for displaying newly created pronunciations to user.
  * Created by Elaine on 12/26/2014.
  */
 public class PronunciationView extends FrameLayout {

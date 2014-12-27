@@ -1,11 +1,11 @@
-package com.elaine.nsliyapplication.drawing;
+package com.elaine.nsliyapplication;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.elaine.nsliyapplication.R;
+import com.elaine.nsliyapplication.input.DrawView;
 
 public class DrawActivity extends Activity {
 

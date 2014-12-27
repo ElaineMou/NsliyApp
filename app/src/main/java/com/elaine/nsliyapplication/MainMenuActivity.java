@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.elaine.nsliyapplication.drawing.DrawActivity;
-
 /**
  * Created by Elaine on 12/25/2014.
  */

@@ -1,4 +1,13 @@
-package com.elaine.nsliyapplication;
+package com.elaine.nsliyapplication.input;
+
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+
+import com.elaine.nsliyapplication.R;
+
+import java.util.ArrayList;
 
 /**
  * Created by Elaine on 12/26/2014.
@@ -49,4 +58,57 @@ public class Pronunciation {
             return appearance;
         }
     };
+
+    public final String syllable;
+    public final Tone tone;
+
+    public Pronunciation(String syllable, Tone tone){
+        this.syllable = syllable;
+        this.tone = tone;
+    }
+
+    /**
+     * Created by Elaine on 12/26/2014.
+     */
+    public static class PronunciationAdapter extends BaseAdapter {
+
+        private final ArrayList<Pronunciation> pronunciations;
+        private final Context context;
+
+        public PronunciationAdapter(Context context, ArrayList<Pronunciation> pronunciations){
+            this.pronunciations = pronunciations;
+            this.context = context;
+        }
+
+        @Override
+        public int getCount() {
+            return pronunciations.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return pronunciations.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            PronunciationView pronunciationView = new PronunciationView(context);
+            pronunciationView.setSyllable(pronunciations.get(position).syllable);
+            pronunciationView.setTone(pronunciations.get(position).tone);
+
+            pronunciationView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pronunciations.remove(position);
+                    notifyDataSetChanged();
+                }
+            });
+            return pronunciationView;
+        }
+    }
 }
