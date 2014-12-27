@@ -30,7 +30,8 @@ public class MainMenuActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.view_button:
-
+                intent = new Intent(this, ViewActivity.class);
+                startActivity(intent);
                 break;
         }
     }

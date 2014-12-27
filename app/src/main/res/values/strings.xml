@@ -22,5 +22,8 @@
     <string name="view_button">View Characters</string>
     <string name="save_button">Save</string>
     <string name="add_button">Add</string>
+    <string name="empty_characters_message">No characters created.</string>
+    <string name="action_add">Add</string>
+    <string name="title_activity_view">View</string>
 
 </resources>
