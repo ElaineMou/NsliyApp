@@ -26,38 +26,28 @@ import java.util.ArrayList;
  */
 public class ViewActivity extends Activity {
 
+    public static final int VIEW_IMAGE_SIZE = 90;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
 
         GridView gridView = (GridView) findViewById(R.id.view_grid);
-        ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+        ArrayList<File> files = new ArrayList<File>();
 
         File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File[] filesList = dir.listFiles();
         for (File file : filesList) {
             if (file.isDirectory()) {
                 File bitmapFile = new File(file,DrawView.DISPLAY_IMAGE_NAME);
-                Log.v("ViewActivity", "Name: " + bitmapFile.getName());
                 if(bitmapFile.exists()){
-                    FileInputStream fileInputStream=null;
-                    try {
-                        fileInputStream = new FileInputStream(bitmapFile);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    if(fileInputStream!=null) {
-                        Log.v("ViewActivity", "Stream not null");
-                        Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
-                        bitmap = bitmap.createScaledBitmap(bitmap,85,85,false);
-                        bitmaps.add(bitmap);
-                    }
+                    files.add(bitmapFile);
                 }
             }
         }
 
-        ImageAdapter imageAdapter = new ImageAdapter(this,bitmaps);
+        ImageAdapter imageAdapter = new ImageAdapter(this,files);
         gridView.setAdapter(imageAdapter);
     }
 

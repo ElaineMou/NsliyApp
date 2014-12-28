@@ -10,4 +10,7 @@
     <dimen name="data_entry_font_size">20sp</dimen>
     <dimen name="tone_radio_font_size">18sp</dimen>
     <dimen name="pronunciation_spacing">2dp</dimen>
+    <dimen name="view_activity_item_width">90dp</dimen>
+    <dimen name="view_activity_spacing">10dp</dimen>
+    <dimen name="view_grid_margin">10dp</dimen>
 </resources>

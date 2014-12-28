@@ -8,6 +8,10 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:numColumns="auto_fit"
+        android:columnWidth="@dimen/view_activity_item_width"
+        android:horizontalSpacing="@dimen/view_activity_spacing"
+        android:verticalSpacing="@dimen/view_activity_spacing"
+        android:padding="@dimen/view_grid_margin"
         android:background="@color/pale_green"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
