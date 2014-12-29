@@ -25,5 +25,9 @@
     <string name="empty_characters_message">No characters created.</string>
     <string name="action_add">Add</string>
     <string name="title_activity_view">View</string>
+    <string name="delete_character_dialog">Delete this character?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="deleted_toast">Deleted character</string>
 
 </resources>

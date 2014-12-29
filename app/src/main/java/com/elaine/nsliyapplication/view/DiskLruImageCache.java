@@ -22,7 +22,7 @@ import java.io.OutputStream;
  */
 public class DiskLruImageCache {
     private DiskLruCache mDiskCache;
-    private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.JPEG;
+    private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.PNG;
     private int mCompressQuality = 90;
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
@@ -162,6 +162,16 @@ public class DiskLruImageCache {
         } catch ( IOException e ) {
             e.printStackTrace();
         }
+    }
+
+    public boolean remove(String key){
+        try{
+            mDiskCache.remove(key);
+            return true;
+        } catch (IOException e) {
+            Log.d("DiskLruImageCache","Exception when removing " + key + " from cache");
+        }
+        return false;
     }
 
     public File getCacheFolder() {

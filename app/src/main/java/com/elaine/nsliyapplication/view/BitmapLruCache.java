@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 /**
+ * Memory cache for String keys to bitmaps for quick retrieval.
  * Created by Elaine on 12/28/2014.
  */
 public class BitmapLruCache extends LruCache<String,Bitmap> {
@@ -21,5 +22,4 @@ public class BitmapLruCache extends LruCache<String,Bitmap> {
         // Cache size in kilobytes, not number of items
         return bitmap.getByteCount() / 1024;
     }
-
 }

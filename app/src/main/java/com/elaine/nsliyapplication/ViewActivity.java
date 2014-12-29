@@ -1,14 +1,20 @@
 package com.elaine.nsliyapplication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.elaine.nsliyapplication.input.DrawView;
 import com.elaine.nsliyapplication.view.BitmapLruCache;
@@ -72,22 +78,52 @@ public class ViewActivity extends Activity {
     public void onResume(){
         super.onResume();
         GridView gridView = (GridView) findViewById(R.id.view_grid);
-        ArrayList<File> files = new ArrayList<File>();
 
         File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if(dir!=null) {
             File[] filesList = dir.listFiles();
-            for (File file : filesList) {
-                if (file.isDirectory()) {
-                    File bitmapFile = new File(file, DrawView.DISPLAY_IMAGE_NAME);
-                    if (bitmapFile.exists()) {
-                        files.add(bitmapFile);
+
+            if(filesList.length == 0){
+                TextView textView = (TextView) findViewById(R.id.empty_message);
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                ArrayList<File> files = new ArrayList<File>();
+                for (File file : filesList) {
+                    if (file.isDirectory()) {
+                        File bitmapFile = new File(file, DrawView.DISPLAY_IMAGE_NAME);
+                        if (bitmapFile.exists()) {
+                            files.add(bitmapFile);
+                        }
                     }
                 }
+                ImageAdapter imageAdapter = new ImageAdapter(this, files, memoryCache, diskCache);
+                gridView.setAdapter(imageAdapter);
+                gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position,
+                                                   long id) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ViewActivity.this);
+                        builder.setMessage(R.string.delete_character_dialog)
+                                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ((ImageAdapter) parent.getAdapter()).remove(position);
+                                        Toast.makeText(ViewActivity.this,R.string.deleted_toast,
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // Nothing
+                                            }
+                                        }
+                                );
+                        builder.create().show();
+                        return true;
+                    }
+                });
             }
-
-            ImageAdapter imageAdapter = new ImageAdapter(this, files, memoryCache, diskCache);
-            gridView.setAdapter(imageAdapter);
         }
     }
 

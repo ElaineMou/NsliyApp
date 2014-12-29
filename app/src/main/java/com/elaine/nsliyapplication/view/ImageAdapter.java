@@ -23,12 +23,12 @@ import java.util.ArrayList;
  */
 public class ImageAdapter extends BaseAdapter {
 
-    Context context;
-    ArrayList<File> files;
+    private Context context;
+    private ArrayList<File> files;
     public static Bitmap placeHolderBitmap;
-    final float scale;
-    DiskLruImageCache diskCache;
-    BitmapLruCache memoryCache;
+    private final float scale;
+    private DiskLruImageCache diskCache;
+    private BitmapLruCache memoryCache;
 
     public ImageAdapter(Context context, ArrayList<File> files, BitmapLruCache lruCache,
                         DiskLruImageCache diskLruImageCache){
@@ -71,6 +71,7 @@ public class ImageAdapter extends BaseAdapter {
             imageFrame.setBackgroundColor(Color.LTGRAY);
         } else {
             imageFrame = (FrameLayout) convertView;
+            imageFrame.removeAllViews();
         }
         ImageView imageView = new ImageView(context);
         loadBitmap(files.get(position), imageView);
@@ -82,7 +83,7 @@ public class ImageAdapter extends BaseAdapter {
     public void loadBitmap(File file, ImageView imageView) {
         final String imageKey = file.getParentFile().getName();
         final Bitmap bitmap = memoryCache.get(imageKey);
-        if(bitmap!=null){
+        if(bitmap!=null && !bitmap.isRecycled()){
             imageView.setImageBitmap(bitmap);
         } else {
             if(BitmapWorkerTask.cancelPotentialWork(file, imageView)) {
@@ -98,4 +99,14 @@ public class ImageAdapter extends BaseAdapter {
 
     }
 
+    public void remove(int position){
+        File file = files.get(position);
+        String key = file.getParentFile().getName();
+        diskCache.remove(key);
+        memoryCache.remove(key).recycle();
+
+        files.get(position).delete();
+        files.remove(position);
+        notifyDataSetChanged();
+    }
 }
