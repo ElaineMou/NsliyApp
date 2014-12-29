@@ -1,14 +1,12 @@
-package com.elaine.nsliyapplication;
+package com.elaine.nsliyapplication.view;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 
-/**
+/** Used to load placeholder bitmaps before real one loads asynchronously.
  * Created by Elaine on 12/28/2014.
  */
 public class AsyncDrawable extends BitmapDrawable {

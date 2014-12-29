@@ -23,5 +23,5 @@
         android:background="@color/dark_green"
         android:textSize="@dimen/data_entry_font_size"
         android:text="@string/empty_characters_message"
-    />
+        />
 </LinearLayout>

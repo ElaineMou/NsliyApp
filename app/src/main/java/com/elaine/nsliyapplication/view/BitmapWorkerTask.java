@@ -1,16 +1,15 @@
-package com.elaine.nsliyapplication;
+package com.elaine.nsliyapplication.view;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 
-/**
+/** Asynchronous task to retrieve bitmap from file, memory cache, or disk cache.
  * Created by Elaine on 12/28/2014.
  */
 public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
@@ -19,18 +18,42 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
     private File file;
     private int reqWidth;
     private int reqHeight;
+    private BitmapLruCache memoryCache;
+    private DiskLruImageCache diskCache;
 
-    public BitmapWorkerTask(ImageView imageView, int width, int height){
+    public BitmapWorkerTask(ImageView imageView, int width, int height, BitmapLruCache cache,
+                            DiskLruImageCache diskLruImageCache){
         // ensure garbage collection with weak reference
         imageViewReference = new WeakReference<ImageView>(imageView);
         reqWidth = width;
         reqHeight = height;
+        memoryCache = cache;
+        diskCache = diskLruImageCache;
     }
 
     @Override
     protected Bitmap doInBackground(File... params) {
         file = params[0];
-        return decodeThumbnail(file);
+        String key = file.getParentFile().getName();
+        // Check disk cache for image
+        Bitmap thumbnail = getBitmapFromDiskCache(key);
+        if(thumbnail == null){
+            thumbnail = decodeThumbnail(file);
+        }
+        addBitmapToCaches(key, thumbnail);
+        return thumbnail;
+    }
+
+    private void addBitmapToCaches(String key, Bitmap bitmap) {
+        if(memoryCache.get(key) == null){
+            memoryCache.put(key, bitmap);
+        }
+
+        synchronized (diskCache.mDiskCacheLock){
+            if(diskCache != null && diskCache.getBitmap(key) == null){
+                diskCache.put(key, bitmap);
+            }
+        }
     }
 
     @Override
@@ -71,6 +94,22 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
             if(drawable instanceof AsyncDrawable){
                 final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
                 return asyncDrawable.getBitmapWorkerTask();
+            }
+        }
+        return null;
+    }
+
+    public Bitmap getBitmapFromDiskCache(String key){
+        synchronized(diskCache.mDiskCacheLock){
+            while(diskCache.mDiskCacheStarting){
+                try{
+                    diskCache.mDiskCacheLock.wait();
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+            if(diskCache != null){
+                return diskCache.getBitmap(key);
             }
         }
         return null;
