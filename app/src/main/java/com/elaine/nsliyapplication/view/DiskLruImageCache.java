@@ -21,18 +21,41 @@ import java.io.OutputStream;
  * Written by Platonius on StackOverflow, modified by Elaine Mou
  */
 public class DiskLruImageCache {
+    /**
+     * The disk cache used to implement this cache.
+     */
     private DiskLruCache mDiskCache;
+    /**
+     * Chosen image compression format.
+     */
     private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.PNG;
+    /**
+     * Compression quality.
+     */
     private int mCompressQuality = 90;
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
+    /**
+     * Tag used for logging.
+     */
     private static final String TAG = "DiskLruImageCache";
 
+    /**
+     * Lock used for synchronization of cache.
+     */
     public final Object mDiskCacheLock = new Object();
+    /**
+     * True until everything is initialized.
+     */
     public boolean mDiskCacheStarting = true;
 
     public DiskLruImageCache() {}
 
+    /**
+     * Open disk cache using directory given.
+     * @param cacheDir - Location of disk cache
+     * @param diskCacheSize - Maximum size of cache
+     */
     public void open(File cacheDir, int diskCacheSize){
         try {
             mDiskCache = DiskLruCache.open( cacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize );
@@ -67,6 +90,11 @@ public class DiskLruImageCache {
         return new File(cachePath + File.separator + uniqueName);
     }
 
+    /**
+     * Places a bitmap in the cache.
+     * @param key - Key used to access image
+     * @param data - Image to be added
+     */
     public void put( String key, Bitmap data ) {
 
         DiskLruCache.Editor editor = null;
@@ -102,6 +130,11 @@ public class DiskLruImageCache {
 
     }
 
+    /**
+     * Retrieves bitmap from cache
+     * @param key - Key used to retrieve bitmap
+     * @return - Image returned from cache
+     */
     public Bitmap getBitmap( String key ) {
 
         Bitmap bitmap = null;
@@ -134,6 +167,11 @@ public class DiskLruImageCache {
 
     }
 
+    /**
+     * If the cache contains the given key.
+     * @param key - Key to be checked
+     * @return - True if cache has the string, false if not
+     */
     public boolean containsKey( String key ) {
 
         boolean contained = false;
@@ -153,6 +191,9 @@ public class DiskLruImageCache {
 
     }
 
+    /**
+     * Clears the disk cache.
+     */
     public void clearCache() {
         if ( BuildConfig.DEBUG ) {
             Log.d("cache_test_DISK_", "disk cache CLEARED");
@@ -164,6 +205,11 @@ public class DiskLruImageCache {
         }
     }
 
+    /**
+     * Removes bitmap from cache.
+     * @param key - Key to be removed.
+     * @return - true if removal is successful, false if not
+     */
     public boolean remove(String key){
         try{
             mDiskCache.remove(key);
@@ -174,6 +220,10 @@ public class DiskLruImageCache {
         return false;
     }
 
+    /**
+     * Returns the cache's directory folder
+     * @return - Directory folder of the cache
+     */
     public File getCacheFolder() {
         return mDiskCache.getDirectory();
     }

@@ -10,10 +10,14 @@ import com.elaine.nsliyapplication.R;
 import java.util.ArrayList;
 
 /**
+ * Class used for Mandarin Chinese pronunciations
  * Created by Elaine on 12/26/2014.
  */
 public class Pronunciation {
 
+    /**
+     * All possible Mandarin Chinese syllables.
+     */
     public static final String[] SYLLABLES = new String[] {"ai","an","ang","ao","ba","bai","ban",
             "bang","bao","bei","ben","beng","bi","bian","biao","bie","bin","bing","bo","bu","ca",
             "cai","can","cang","cao","ce","cen","ceng","cha","chai","chan","chang","chao","che",
@@ -45,21 +49,33 @@ public class Pronunciation {
             "zhi","zhong","zhou","zhu","zhua","zhuan","zhuang","zhui","zhun","zhuo","zi","zong",
             "zou","zu","zuan","zui","zun","zuo"};
 
+    /**
+     * Possible Mandarin Chinese tones.
+     */
     public static enum Tone {FIRST("1"),SECOND("2"),THIRD("3"),FOURTH("4"),NEUTRAL(" "),UNKNOWN("?");
 
         Tone(String name){
             appearance = name;
         }
 
+        /**
+         * String to be displayed to user.
+         */
         String appearance;
 
         @Override
         public String toString(){
             return appearance;
         }
-    };
+    }
 
+    /**
+     * Syllable component of pronunciation.
+     */
     public final String syllable;
+    /**
+     * Tone component of pronunciation.
+     */
     public final Tone tone;
 
     public Pronunciation(String syllable, Tone tone){
@@ -68,11 +84,18 @@ public class Pronunciation {
     }
 
     /**
+     * Displays pronunciations to an AdapterView.
      * Created by Elaine on 12/26/2014.
      */
     public static class PronunciationAdapter extends BaseAdapter {
 
+        /**
+         * List of pronunciations to be shown.
+         */
         private final ArrayList<Pronunciation> pronunciations;
+        /**
+         * Context to display items in.
+         */
         private final Context context;
 
         public PronunciationAdapter(Context context, ArrayList<Pronunciation> pronunciations){
@@ -101,6 +124,7 @@ public class Pronunciation {
             pronunciationView.setSyllable(pronunciations.get(position).syllable);
             pronunciationView.setTone(pronunciations.get(position).tone);
 
+            // Allows pressing the delete button to delete the pronunciation from the list.
             pronunciationView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

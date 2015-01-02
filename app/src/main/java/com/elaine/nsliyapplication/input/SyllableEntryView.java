@@ -20,14 +20,28 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 /**
+ * View for user to input and add pronunciations to the character being drawn.
  * @author Elaine Mou
  */
 public class SyllableEntryView extends FrameLayout implements AdapterView.OnItemClickListener,
         View.OnClickListener {
 
-    private static final int MAX_NUM_PRONUNCIATIONS = 6;
-    private static final String SYLLABLE_FILE_NAME = "pronunciations.txt";
-    ArrayList<Pronunciation> pronunciations = new ArrayList<Pronunciation>();
+    /**
+     * Maximum number of pronunciations a single character can have saved.
+     */
+    public static final int MAX_NUM_PRONUNCIATIONS = 6;
+    /**
+     * Name of file to hold pronunciations
+     */
+    public static final String SYLLABLE_FILE_NAME = "pronunciations.txt";
+    /**
+     * Separator between pronunciations in text file.
+     */
+    public static final String PRONUNCIATION_SEPARATOR = ",";
+    /**
+     * List of pronunciations currently added by user.
+     */
+    private ArrayList<Pronunciation> pronunciations = new ArrayList<Pronunciation>();
 
     public SyllableEntryView(Context context) {
         super(context);
@@ -44,10 +58,14 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         initView();
     }
 
+    /**
+     * Initializes view contents.
+     */
     private void initView(){
         View view = inflate(getContext(), R.layout.view_data_entry,null);
         addView(view);
 
+        // Initializes AutoCompleteTextView to enter syllables into
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(),
                 android.R.layout.simple_dropdown_item_1line, Pronunciation.SYLLABLES);
         AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView)
@@ -56,12 +74,15 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         autoCompleteTextView.setThreshold(1);
         autoCompleteTextView.setOnItemClickListener(this);
 
+        // Initialize radio group to Unknown tone
         RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.tone_group);
         radioGroup.check(R.id.unknown_radio);
 
+        // Ready add button
         Button button = (Button) view.findViewById(R.id.add_button);
         button.setOnClickListener(this);
 
+        // Set adapter to GridView of PronunciationViews
         Pronunciation.PronunciationAdapter pronunciationAdapter =
                 new Pronunciation.PronunciationAdapter(getContext(),pronunciations);
         GridView pronunciationsLayout = (GridView) view.findViewById(R.id.pronunciation_series);
@@ -71,6 +92,7 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(getFocusedChild()!=null) {
+            // Close keyboard upon selecting a syllable
             InputMethodManager inputMethodManager = (InputMethodManager) getContext()
                     .getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(getFocusedChild().getWindowToken(), 0);
@@ -82,7 +104,9 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         int viewId = v.getId();
 
         switch(viewId){
+            // If Add button is chosen
             case R.id.add_button:
+                // If room to add more
                 if(pronunciations.size() < MAX_NUM_PRONUNCIATIONS) {
                     AutoCompleteTextView autoCompleteTextView =
                             (AutoCompleteTextView) findViewById(R.id.pronounce_field);
@@ -111,6 +135,7 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                             break;
                     }
 
+                    // Add new PronunciationView to grid using input data
                     Pronunciation pronunciation =
                             new Pronunciation(autoCompleteTextView.getText().toString(), tone);
                     pronunciations.add(pronunciation);
@@ -122,15 +147,20 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         }
     }
 
+    /**
+     * Save syllables into a file in the given file directory
+     * @param directory - File directory to save entries in.
+     */
     public void saveSyllables(File directory){
         if(directory.exists()){
             boolean success = true;
             StringBuilder strBuilder = new StringBuilder();
+            // Build string of separated pronunciations
             for(Pronunciation pronunciation: pronunciations){
                 strBuilder.append(pronunciation.syllable).append(pronunciation.tone.toString()).
-                        append(",");
+                        append(PRONUNCIATION_SEPARATOR);
             }
-            // Create new text file
+            // Create new unique text file and write built string to it
             File textFile = new File(directory, SYLLABLE_FILE_NAME);
             if (textFile.exists()) {
                 textFile.delete();

@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.elaine.nsliyapplication.R;
 
 /**
+ * Displays a Pronunciation along with a delete button.
  * Created by Elaine on 12/26/2014.
  */
 public class PronunciationView extends FrameLayout {
@@ -27,16 +28,27 @@ public class PronunciationView extends FrameLayout {
         initView();
     }
 
+    /**
+     * Inflates corresponding view into this layout.
+     */
     private void initView() {
         View view = inflate(getContext(), R.layout.view_pronunciation,null);
         addView(view);
     }
 
+    /**
+     * Sets syllable portion of the pronunciation to the given string.
+     * @param syllable - Syllable to be displayed.
+     */
     public void setSyllable(String syllable){
         TextView textView = (TextView) findViewById(R.id.syllable);
         textView.setText(syllable);
     }
 
+    /**
+     * Sets tone of the pronunciation to the given Tone.
+     * @param tone - Tone to be displayed.
+     */
     public void setTone(Pronunciation.Tone tone){
         TextView textView = (TextView) findViewById(R.id.tone);
         textView.setText(tone.toString());

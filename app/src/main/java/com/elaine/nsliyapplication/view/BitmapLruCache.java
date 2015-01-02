@@ -9,14 +9,18 @@ import android.util.LruCache;
  */
 public class BitmapLruCache extends LruCache<String,Bitmap> {
     /**
-     * @param maxSize for caches that do not override {@link #sizeOf}, this is
-     *                the maximum number of entries in the cache. For all other caches,
-     *                this is the maximum sum of the sizes of the entries in this cache.
+     * @param maxSize The maximum sum of the sizes of the entries in this cache - in KB.
      */
     public BitmapLruCache(int maxSize) {
         super(maxSize);
     }
 
+    /**
+     * Gets the size of the bitmap in kilobytes.
+     * @param key - String used to access bitmap.
+     * @param bitmap - Bitmap to be sized.
+     * @return - Size of the image in KB.
+     */
     @Override
     protected int sizeOf(String key, Bitmap bitmap){
         // Cache size in kilobytes, not number of items

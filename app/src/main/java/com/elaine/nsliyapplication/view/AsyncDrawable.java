@@ -6,11 +6,14 @@ import android.graphics.drawable.BitmapDrawable;
 
 import java.lang.ref.WeakReference;
 
-/** Used to load placeholder bitmaps before real one loads asynchronously.
+/** Used to immediately load placeholder bitmaps before real one loads asynchronously.
  * Created by Elaine on 12/28/2014.
  */
 public class AsyncDrawable extends BitmapDrawable {
 
+    /**
+     * Used to ensure garbage collection of task.
+     */
     private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskWeakReference;
 
     public AsyncDrawable(Resources resources, Bitmap bitmap, BitmapWorkerTask bitmapWorkerTask){

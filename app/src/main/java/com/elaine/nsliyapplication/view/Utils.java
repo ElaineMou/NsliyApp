@@ -6,7 +6,7 @@ import android.os.Environment;
 
 import java.io.File;
 
-/**
+/** Utils class for DiskLruImageCache
  * Written by Platonius on StackOverflow
  */
 

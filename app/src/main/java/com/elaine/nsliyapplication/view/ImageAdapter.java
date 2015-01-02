@@ -100,12 +100,15 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public void remove(int position){
-        File file = files.get(position);
-        String key = file.getParentFile().getName();
+        // Get character directory
+        File file = files.get(position).getParentFile();
+        String key = file.getName();
+        // Remove character from cache
         diskCache.remove(key);
         memoryCache.remove(key).recycle();
 
-        files.get(position).delete();
+        // Delete character directory from files and in-memory list
+        file.delete();
         files.remove(position);
         notifyDataSetChanged();
     }

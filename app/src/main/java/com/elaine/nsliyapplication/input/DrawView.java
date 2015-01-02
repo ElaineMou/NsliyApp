@@ -32,6 +32,14 @@ public class DrawView extends View {
      */
     public static final String DISPLAY_IMAGE_NAME = "display.png";
     /**
+     * Separator between x and y coordinates of a pair of offsets coordinates.
+     */
+    public static final String XY_SEPARATOR = ",";
+    /**
+     * Separator between multiple pairs of offsets coordinates.
+     */
+    public static final String OFFSETS_SEPARATOR = ";";
+    /**
      * Minimum width for ink strokes.
      */
     private static final float MIN_STROKE_WIDTH = 15f;
@@ -132,7 +140,9 @@ public class DrawView extends View {
         redPaint.setColor(Color.RED);
     }
 
-    // Clear screen
+    /**
+     * Clears screen of strokes, empties lists, and resets bounds of current character, strokes.
+     */
     public void clear(){
         touchPoints.clear();
         displayBitmap = null;
@@ -336,7 +346,7 @@ public class DrawView extends View {
      * @return - Width of stroke to be drawn
      */
     private float strokeWidth(float velocity) {
-        float width = MIN_STROKE_WIDTH;
+        float width;
         if(velocity < MAX_VELOCITY){
             width = MIN_STROKE_WIDTH +
                     (MAX_STROKE_WIDTH - MIN_STROKE_WIDTH)*(1 - velocity/MAX_VELOCITY);
@@ -544,9 +554,9 @@ public class DrawView extends View {
                         for (int i = 0; i < size; i++) {
                             Point coordinates = offsetsFromCorner.get(i);
                             strBuilder.append((int) (coordinates.getX() - realCharacterBounds.left))
-                                    .append(",")
+                                    .append(XY_SEPARATOR)
                                     .append((int) (coordinates.getY() - realCharacterBounds.top))
-                                    .append(";");
+                                    .append(OFFSETS_SEPARATOR);
                         }
 
                         // Create new text file
@@ -568,7 +578,7 @@ public class DrawView extends View {
                 }
             }
             // Notify user if we could save to external storage
-            CharSequence text = "";
+            CharSequence text;
             if(success) {
                 text = "Successfully added character.";
             } else {
@@ -589,12 +599,10 @@ public class DrawView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        int width = widthSize;
         int height;
 
         //Measure Height
