@@ -137,7 +137,8 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
 
                     // Add new PronunciationView to grid using input data
                     Pronunciation pronunciation =
-                            new Pronunciation(autoCompleteTextView.getText().toString(), tone);
+                            new Pronunciation(autoCompleteTextView.getText().toString().
+                                    replaceAll("[^a-zA-Z]","").toLowerCase(), tone);
                     pronunciations.add(pronunciation);
 
                     GridView gridView = (GridView) findViewById(R.id.pronunciation_series);

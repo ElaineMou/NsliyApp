@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import com.elaine.nsliyapplication.R;
 
@@ -119,8 +120,8 @@ public class Pronunciation {
         }
 
         @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            PronunciationView pronunciationView = new PronunciationView(context);
+        public View getView(final int position, final View convertView, ViewGroup parent) {
+            final PronunciationView pronunciationView = new PronunciationView(context);
             pronunciationView.setSyllable(pronunciations.get(position).syllable);
             pronunciationView.setTone(pronunciations.get(position).tone);
 
@@ -130,6 +131,16 @@ public class Pronunciation {
                 public void onClick(View v) {
                     pronunciations.remove(position);
                     notifyDataSetChanged();
+                }
+            });
+
+            pronunciationView.findViewById(R.id.text_container).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Play sound when tapped
+                    new SyllableSoundTask(context).execute(
+                        ((TextView) pronunciationView.findViewById(R.id.syllable)).getText().toString(),
+                        ((TextView)pronunciationView.findViewById(R.id.tone)).getText().toString());
                 }
             });
             return pronunciationView;
