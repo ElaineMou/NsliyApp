@@ -109,21 +109,23 @@ public class ViewActivity extends Activity {
         if(dir!=null) {
             // Get character directories
             File[] filesList = dir.listFiles();
-
-            // If none, display empty message
-            if(filesList.length == 0){
-                TextView textView = (TextView) findViewById(R.id.empty_message);
-                textView.setVisibility(View.VISIBLE);
-            } else { // Otherwise, add all files of display images in the list
-                ArrayList<File> files = new ArrayList<File>();
-                for (File file : filesList) {
-                    if (file.isDirectory()) {
-                        File bitmapFile = new File(file, DrawView.DISPLAY_IMAGE_NAME);
-                        if (bitmapFile.exists()) {
-                            files.add(bitmapFile);
-                        }
+            ArrayList<File> files = new ArrayList<File>();
+            for (File file : filesList) {
+                if (file.isDirectory()) {
+                    File bitmapFile = new File(file, DrawView.DISPLAY_IMAGE_NAME);
+                    if (bitmapFile.exists()) {
+                        files.add(bitmapFile);
                     }
                 }
+            }
+
+            TextView textView = (TextView) findViewById(R.id.empty_message);
+            // If none, display empty message
+            if(files.isEmpty()){
+                textView.setVisibility(View.VISIBLE);
+            } else { // Otherwise, add all files of display images in the list
+                textView.setVisibility(View.INVISIBLE);
+
                 // Make a new adapter of these files and the current memory and disk caches
                 ImageAdapter imageAdapter = new ImageAdapter(this, files, memoryCache, diskCache);
                 gridView.setAdapter(imageAdapter);
@@ -137,10 +139,15 @@ public class ViewActivity extends Activity {
                                 .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        ((ImageAdapter) parent.getAdapter()).remove(position);
-                                        // Notify user through short Toast
-                                        Toast.makeText(ViewActivity.this,R.string.deleted_toast,
-                                                Toast.LENGTH_SHORT).show();
+                                        if(((ImageAdapter) parent.getAdapter()).remove(position)) {
+                                            // Notify user through short Toast
+                                            Toast.makeText(ViewActivity.this, R.string.deleted_toast,
+                                                    Toast.LENGTH_SHORT).show();
+                                            // Display empty message when all files are gone
+                                            if(((ImageAdapter) parent.getAdapter()).filesEmpty()){
+                                                findViewById(R.id.empty_message).setVisibility(View.VISIBLE);
+                                            }
+                                        }
                                     }
                                 })
                                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -151,8 +158,17 @@ public class ViewActivity extends Activity {
                                         }
                                 );
                         builder.create().show();
-                        // TODO: Check if list is now empty and display empty message to user
                         return true;
+                    }
+                });
+                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        // Open editing activity on the relevant file
+                        Intent intent = new Intent(ViewActivity.this,EditDrawActivity.class);
+                        intent.putExtra(EditDrawActivity.FILE_EXTRA_NAME,((ImageAdapter)parent.
+                                getAdapter()).getFiles().get(position).getParentFile().getAbsolutePath());
+                        startActivity(intent);
                     }
                 });
             }

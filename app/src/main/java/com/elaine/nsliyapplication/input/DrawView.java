@@ -2,18 +2,25 @@ package com.elaine.nsliyapplication.input;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.elaine.nsliyapplication.EditDrawActivity;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -31,6 +38,18 @@ public class DrawView extends View {
      * Name of display bitmap file to show complete character.
      */
     public static final String DISPLAY_IMAGE_NAME = "display.png";
+    /**
+     * Prefix of character directory file names.
+     */
+    public static final String CHARACTER_PREFIX = "character";
+    /**
+     * Prefix of stroke image file names.
+     */
+    public static final String STROKE_PREFIX = "stroke";
+    /**
+     * Type of image file for strokes.
+     */
+    public static final String IMAGE_TYPE = ".png";
     /**
      * Separator between x and y coordinates of a pair of offsets coordinates.
      */
@@ -55,6 +74,10 @@ public class DrawView extends View {
      * Maximum velocity received by view.
      */
     private static final float MAX_VELOCITY = 6f;
+    /**
+     * Proportion of view to leave as blank space when loading from directory.
+     */
+    private static final float BORDER_FRACTION = .2f;
 
     /**
      * Paint used to draw.
@@ -140,6 +163,13 @@ public class DrawView extends View {
         redPaint.setColor(Color.RED);
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh){
+        if(getContext() instanceof EditDrawActivity){
+            loadFromDirectory(((EditDrawActivity) getContext()).getDirectory());
+        }
+    }
+
     /**
      * Clears screen of strokes, empties lists, and resets bounds of current character, strokes.
      */
@@ -155,7 +185,9 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas){
+        Log.v("loadFromDirectory","onDrawing");
         if(displayBitmap !=null) {
+            Log.v("loadFromDirectory","onDrawing and not null");
             canvas.drawBitmap(displayBitmap,0,0,null);
         }
     }
@@ -429,6 +461,22 @@ public class DrawView extends View {
         return false;
     }
 
+    public static File generateDirectoryName(Context context){
+        int n=0;
+        Random random = new Random();
+        String directoryName;
+        File directory;
+        // Guarantee a unique folder for new character
+        do {
+            n += random.nextInt(100);
+            directoryName = CHARACTER_PREFIX + n;
+            directory = new File(context.getExternalFilesDir(
+                    Environment.DIRECTORY_PICTURES), directoryName);
+        } while (directory.exists());
+
+        return directory;
+    }
+
     public void undo() {
         // If any set is empty, clear all data of previous strokes.
         if(strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()){
@@ -473,36 +521,42 @@ public class DrawView extends View {
     }
 
     /**
+     *
      * Saves current character and strokes to file.
      * @param context - Activity passed in to get directory
      */
-    public File saveCharacter(Context context){
+    public File saveCharacter(Context context, File directory){
         boolean success = false;
-        File directory = null;
         if(strokes.size() > 0) { // If we can write to external storage
             if(isExternalStorageWritable()) {
                 // Check there are strokes and data matches up
                 if (strokes.size() == offsetsFromCorner.size()) {
                     // Get the directory for the app's private pictures directory.
-                    int n=0;
-                    Random random = new Random();
-                    String directoryName;
-                    // Guarantee a unique folder for new character
-                    do {
-                        n += random.nextInt(100);
-                        directoryName = "character-" + n;
-                        directory = new File(context.getExternalFilesDir(
-                                Environment.DIRECTORY_PICTURES), directoryName);
-                    } while (directory.exists());
+
+                    if(directory==null){
+                        directory = generateDirectoryName(context);
+                        if(directory.mkdir()){
+                            success = true;
+                        }
+                    } else {
+                        File[] fileList = directory.listFiles();
+                        if(fileList.length!=0){
+                            success = true;
+                            for(File file: fileList){
+                                if(!file.delete()){
+                                    success = false;
+                                }
+                            }
+                        }
+                    }
 
                     // Create directory, quit if not possible
-                    if (directory.mkdir()) {
-                        success = true;
+                    if (success) {
                         // For each stroke to send
                         int size = strokes.size();
                         for (int i = 0; i < size; i++) {
                             // Generate a numbered name
-                            String fileName = "stroke-" + i + ".png";
+                            String fileName = STROKE_PREFIX + i + IMAGE_TYPE;
                             File imageFile = new File(directory, fileName);
                             if (imageFile.exists()) {
                                 imageFile.delete();
@@ -618,5 +672,115 @@ public class DrawView extends View {
         }
 
         setMeasuredDimension(width,height);
+    }
+
+    public void loadFromDirectory(File directory){
+        clear();
+        if(displayBitmap == null) {
+            // Create displayBitmap with transparency, new canvas to draw onto displayBitmap with.
+            displayBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            displayCanvas = new Canvas(displayBitmap);
+            displayCanvas.drawColor(Color.TRANSPARENT);
+        }
+        File offsets = new File(directory,OFFSET_FILE_NAME);
+        Log.v("loadFromDirectory","Directory is: " + directory.getName());
+        if(offsets.exists()) {
+            Log.v("loadFromDirectory","Offsets exists");
+            BufferedReader bufferedReader=null;
+            StringBuilder stringBuilder=null;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(offsets));
+                stringBuilder = new StringBuilder();
+                String line = bufferedReader.readLine();
+
+                while(line!=null){
+                    stringBuilder.append(line);
+                    line = bufferedReader.readLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally{
+                if(bufferedReader!=null){
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(stringBuilder!=null) {
+                Log.v("loadFromDirectory","SB contains: " + stringBuilder.toString());
+
+                File imageFile = new File(directory,DISPLAY_IMAGE_NAME);
+
+                // Retrieve just image's size before loading actual image data
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
+                int imageHeight = options.outHeight;
+                int imageWidth = options.outWidth;
+                int inSampleSize = 1;
+
+                int viewWidth = (int) (getWidth() * (1 - BORDER_FRACTION));
+                int viewHeight = (int) (getHeight() * (1 - BORDER_FRACTION));
+
+                // Find greatest inSampleSize where image is just larger than bounds
+                if(imageHeight > viewHeight || imageWidth > viewWidth){
+                    final int halfHeight = imageHeight/2;
+                    final int halfWidth = imageWidth/2;
+
+                    while( (halfHeight / inSampleSize ) > viewHeight && (halfWidth/ inSampleSize) > viewWidth){
+                        inSampleSize *= 2;
+                    }
+                }
+
+                int width;
+                int height;
+
+                float scaleX = (float) viewWidth/imageWidth;
+                float scaleY = (float) viewHeight/imageHeight;
+
+                // If x coordinates need to be shrunk more than y coordinates
+                if(scaleX < scaleY){
+                    // Match width to bounds and scale height accordingly
+                    width = viewWidth;
+                    height = (int) (((float) imageHeight / imageWidth) * width);
+                } else { // If y coordinates need to be shrunk more than x coordinates
+                    // Match height to bounds and scale width accordingly
+                    height = viewHeight;
+                    width = (int) (((float) imageWidth/imageHeight) * height);
+                }
+
+                // Create sampled bitmap at smallest size (divided by power of 2) larger than given bounds
+                options.inSampleSize = inSampleSize;
+                options.inJustDecodeBounds = false;
+                Bitmap display = BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
+                // Return scaled bitmap of thumbnail size
+                display = Bitmap.createScaledBitmap(display,width,height, false);
+                int spaceFromLeft = (int) (getWidth()*BORDER_FRACTION/2);
+                int spaceFromTop = (int) (getHeight()*BORDER_FRACTION/2);
+                displayCanvas.drawBitmap(display,spaceFromLeft, spaceFromTop, null);
+                Log.v("loadFromDirectory","Width: " + width + " Height: " + height);
+                Log.v("loadFromDirectory","Left: " + spaceFromLeft + " Top: " + spaceFromTop);
+
+                String[] pairs = stringBuilder.toString().split(OFFSETS_SEPARATOR);
+                for(int i=0;i<pairs.length;i++){
+                    File strokeFile = new File(directory,STROKE_PREFIX + i + IMAGE_TYPE);
+                    if(strokeFile.exists()) {
+                        String[] xy = pairs[i].split(XY_SEPARATOR);
+                        int x = Integer.parseInt(xy[0]);
+                        int y = Integer.parseInt(xy[1]);
+
+                        // TODO: add Scaling to these calculations as well.
+                        offsetsFromCorner.add(new Point(x + spaceFromLeft,y + spaceFromTop));
+
+                        Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath());
+                        strokes.add(bitmap);
+                    }
+                }
+
+                invalidate();
+            }
+        }
     }
 }

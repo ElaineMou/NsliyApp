@@ -10,18 +10,26 @@ import com.elaine.nsliyapplication.input.SyllableEntryView;
 
 import java.io.File;
 
-public class DrawActivity extends Activity {
+/**
+ * Used to edit previously written characters.
+ * Created by Elaine on 1/4/2015.
+ */
+public class EditDrawActivity extends Activity {
+
+    public static final String FILE_EXTRA_NAME = "fileName";
+    File directory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
+        directory = new File(getIntent().getStringExtra(FILE_EXTRA_NAME));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.draw, menu);
+        getMenuInflater().inflate(R.menu.edit, menu);
         return true;
     }
 
@@ -31,17 +39,21 @@ public class DrawActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_clear) {
-            ( (DrawView) findViewById(R.id.draw_view) ).clear();
+        if (id == R.id.action_revert) {
+            ( (DrawView) findViewById(R.id.draw_view) ).loadFromDirectory(directory);
             return true;
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
         } else if (id == R.id.action_save){
-            File directory = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, null);
             if(directory!=null){
+                ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, directory);
                 ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public File getDirectory(){
+        return directory;
     }
 }

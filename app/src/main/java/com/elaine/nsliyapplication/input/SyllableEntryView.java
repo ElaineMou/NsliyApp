@@ -35,6 +35,10 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
      */
     public static final String SYLLABLE_FILE_NAME = "pronunciations.txt";
     /**
+     * Separator between syllable and tone in text file.
+     */
+    public static final String SYLLABLE_TONE_SEPARATOR = ".";
+    /**
      * Separator between pronunciations in text file.
      */
     public static final String PRONUNCIATION_SEPARATOR = ",";
@@ -110,39 +114,42 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                 if(pronunciations.size() < MAX_NUM_PRONUNCIATIONS) {
                     AutoCompleteTextView autoCompleteTextView =
                             (AutoCompleteTextView) findViewById(R.id.pronounce_field);
-                    RadioGroup radioGroup = (RadioGroup) findViewById(R.id.tone_group);
+                    String syllable = autoCompleteTextView.getText().toString().replaceAll
+                            ("[^a-zA-Z]", "").toLowerCase();
+                    if(!syllable.isEmpty()) {
+                        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.tone_group);
 
-                    int checkedRadioId = radioGroup.getCheckedRadioButtonId();
-                    Pronunciation.Tone tone = Pronunciation.Tone.UNKNOWN;
-                    switch (checkedRadioId) {
-                        case R.id.first_radio:
-                            tone = Pronunciation.Tone.FIRST;
-                            break;
-                        case R.id.second_radio:
-                            tone = Pronunciation.Tone.SECOND;
-                            break;
-                        case R.id.third_radio:
-                            tone = Pronunciation.Tone.THIRD;
-                            break;
-                        case R.id.fourth_radio:
-                            tone = Pronunciation.Tone.FOURTH;
-                            break;
-                        case R.id.neutral_radio:
-                            tone = Pronunciation.Tone.NEUTRAL;
-                            break;
-                        case R.id.unknown_radio:
-                            tone = Pronunciation.Tone.UNKNOWN;
-                            break;
+                        int checkedRadioId = radioGroup.getCheckedRadioButtonId();
+                        Pronunciation.Tone tone = Pronunciation.Tone.UNKNOWN;
+                        switch (checkedRadioId) {
+                            case R.id.first_radio:
+                                tone = Pronunciation.Tone.FIRST;
+                                break;
+                            case R.id.second_radio:
+                                tone = Pronunciation.Tone.SECOND;
+                                break;
+                            case R.id.third_radio:
+                                tone = Pronunciation.Tone.THIRD;
+                                break;
+                            case R.id.fourth_radio:
+                                tone = Pronunciation.Tone.FOURTH;
+                                break;
+                            case R.id.neutral_radio:
+                                tone = Pronunciation.Tone.NEUTRAL;
+                                break;
+                            case R.id.unknown_radio:
+                                tone = Pronunciation.Tone.UNKNOWN;
+                                break;
+                        }
+
+                        // Add new PronunciationView to grid using input data
+                        Pronunciation pronunciation =
+                                new Pronunciation(syllable, tone);
+                        pronunciations.add(pronunciation);
+
+                        GridView gridView = (GridView) findViewById(R.id.pronunciation_series);
+                        ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
                     }
-
-                    // Add new PronunciationView to grid using input data
-                    Pronunciation pronunciation =
-                            new Pronunciation(autoCompleteTextView.getText().toString().
-                                    replaceAll("[^a-zA-Z]","").toLowerCase(), tone);
-                    pronunciations.add(pronunciation);
-
-                    GridView gridView = (GridView) findViewById(R.id.pronunciation_series);
-                    ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
                 }
                 break;
         }
@@ -158,8 +165,8 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
             StringBuilder strBuilder = new StringBuilder();
             // Build string of separated pronunciations
             for(Pronunciation pronunciation: pronunciations){
-                strBuilder.append(pronunciation.syllable).append(pronunciation.tone.toString()).
-                        append(PRONUNCIATION_SEPARATOR);
+                strBuilder.append(pronunciation.syllable).append(SYLLABLE_TONE_SEPARATOR).
+                        append(pronunciation.tone.toString()).append(PRONUNCIATION_SEPARATOR);
             }
             // Create new unique text file and write built string to it
             File textFile = new File(directory, SYLLABLE_FILE_NAME);
@@ -179,5 +186,9 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                 textFile.delete();
             }
         }
+    }
+
+    public void loadFromDirectory(File directory){
+
     }
 }

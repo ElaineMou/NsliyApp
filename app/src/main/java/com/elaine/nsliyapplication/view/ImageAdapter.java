@@ -11,7 +11,6 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
-
 import com.elaine.nsliyapplication.R;
 import com.elaine.nsliyapplication.ViewActivity;
 
@@ -60,7 +59,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         FrameLayout imageFrame;
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
@@ -99,17 +98,31 @@ public class ImageAdapter extends BaseAdapter {
 
     }
 
-    public void remove(int position){
+    public boolean remove(int position){
         // Get character directory
-        File file = files.get(position).getParentFile();
-        String key = file.getName();
+        File directory = files.get(position).getParentFile();
+        String key = directory.getName();
         // Remove character from cache
         diskCache.remove(key);
         memoryCache.remove(key).recycle();
 
         // Delete character directory from files and in-memory list
-        file.delete();
         files.remove(position);
         notifyDataSetChanged();
+
+        File[] fileList = directory.listFiles();
+        for(File file:fileList){
+            file.delete();
+        }
+
+        return directory.delete();
+    }
+
+    public ArrayList<File> getFiles(){
+        return files;
+    }
+
+    public boolean filesEmpty(){
+        return files.isEmpty();
     }
 }

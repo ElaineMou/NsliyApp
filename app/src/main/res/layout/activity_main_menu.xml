@@ -15,16 +15,16 @@
         android:adjustViewBounds="true"/>
 
     <Button
-        android:id="@+id/draw_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/main_menu_button_size"
-        android:text="@string/draw_button"/>
-    <Button
         android:id="@+id/view_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/main_menu_button_size"
         android:text="@string/view_button"/>
+    <Button
+        android:id="@+id/words_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/main_menu_button_size"
+        android:text="@string/words_button"/>
 
 </LinearLayout>

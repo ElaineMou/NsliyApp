@@ -29,5 +29,8 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="deleted_toast">Deleted character</string>
+    <string name="words_button">Manage Words</string>
+    <string name="title_activity_edit_draw">Edit</string>
+    <string name="action_revert">Revert</string>
 
 </resources>
