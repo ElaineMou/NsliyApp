@@ -188,7 +188,7 @@ public class DrawView extends View {
         Log.v("loadFromDirectory","onDrawing");
         if(displayBitmap !=null) {
             Log.v("loadFromDirectory","onDrawing and not null");
-            canvas.drawBitmap(displayBitmap,0,0,null);
+            canvas.drawBitmap(displayBitmap, 0, 0, null);
         }
     }
 
@@ -634,7 +634,7 @@ public class DrawView extends View {
             // Notify user if we could save to external storage
             CharSequence text;
             if(success) {
-                text = "Successfully added character.";
+                text = "Successfully saved character.";
             } else {
                 text = "Failed to save.";
                 // Clear the folder if incomplete
@@ -683,9 +683,7 @@ public class DrawView extends View {
             displayCanvas.drawColor(Color.TRANSPARENT);
         }
         File offsets = new File(directory,OFFSET_FILE_NAME);
-        Log.v("loadFromDirectory","Directory is: " + directory.getName());
         if(offsets.exists()) {
-            Log.v("loadFromDirectory","Offsets exists");
             BufferedReader bufferedReader=null;
             StringBuilder stringBuilder=null;
             try {
@@ -709,8 +707,6 @@ public class DrawView extends View {
                 }
             }
             if(stringBuilder!=null) {
-                Log.v("loadFromDirectory","SB contains: " + stringBuilder.toString());
-
                 File imageFile = new File(directory,DISPLAY_IMAGE_NAME);
 
                 // Retrieve just image's size before loading actual image data
@@ -719,8 +715,10 @@ public class DrawView extends View {
                 BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
                 int imageHeight = options.outHeight;
                 int imageWidth = options.outWidth;
+
                 int inSampleSize = 1;
 
+                // Define bounds of area to be drawn in.
                 int viewWidth = (int) (getWidth() * (1 - BORDER_FRACTION));
                 int viewHeight = (int) (getHeight() * (1 - BORDER_FRACTION));
 
@@ -734,48 +732,65 @@ public class DrawView extends View {
                     }
                 }
 
+                // Create sampled bitmap at smallest size (divided by power of 2) larger than given bounds
+                options.inSampleSize = inSampleSize;
+                options.inJustDecodeBounds = false;
+                Bitmap display = BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
+
+                // Find scale between view dimensions and sampled image dimensions.
+                float scaleX = (float) viewWidth/options.outWidth;
+                float scaleY = (float) viewHeight/options.outHeight;
+
+                // Find coordinates of top left corner of view inside border
+                int spaceFromLeft = (int) (getWidth()*BORDER_FRACTION/2);
+                int spaceFromTop = (int) (getHeight()*BORDER_FRACTION/2);
+
                 int width;
                 int height;
-
-                float scaleX = (float) viewWidth/imageWidth;
-                float scaleY = (float) viewHeight/imageHeight;
-
                 // If x coordinates need to be shrunk more than y coordinates
                 if(scaleX < scaleY){
                     // Match width to bounds and scale height accordingly
                     width = viewWidth;
                     height = (int) (((float) imageHeight / imageWidth) * width);
+                    // Adjust space from top and fix the y-axis scale factor
+                    spaceFromTop += (viewHeight - height)/2;
+                    scaleY = ((float) height)/options.outHeight;
                 } else { // If y coordinates need to be shrunk more than x coordinates
                     // Match height to bounds and scale width accordingly
                     height = viewHeight;
                     width = (int) (((float) imageWidth/imageHeight) * height);
+                    // Adjust space from left and fix the x-axis scale factor
+                    spaceFromLeft += (viewWidth - width)/2;
+                    scaleX = ((float) width)/options.outWidth;
                 }
 
-                // Create sampled bitmap at smallest size (divided by power of 2) larger than given bounds
-                options.inSampleSize = inSampleSize;
-                options.inJustDecodeBounds = false;
-                Bitmap display = BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
-                // Return scaled bitmap of thumbnail size
+                // Return scaled bitmap of matching size
                 display = Bitmap.createScaledBitmap(display,width,height, false);
-                int spaceFromLeft = (int) (getWidth()*BORDER_FRACTION/2);
-                int spaceFromTop = (int) (getHeight()*BORDER_FRACTION/2);
                 displayCanvas.drawBitmap(display,spaceFromLeft, spaceFromTop, null);
-                Log.v("loadFromDirectory","Width: " + width + " Height: " + height);
-                Log.v("loadFromDirectory","Left: " + spaceFromLeft + " Top: " + spaceFromTop);
+
+                // Set character bounds
+                rawCharacterBounds = new RectF(spaceFromLeft,spaceFromTop,
+                        spaceFromLeft + width, spaceFromTop + height);
 
                 String[] pairs = stringBuilder.toString().split(OFFSETS_SEPARATOR);
                 for(int i=0;i<pairs.length;i++){
                     File strokeFile = new File(directory,STROKE_PREFIX + i + IMAGE_TYPE);
+                    // For each stroke in file
                     if(strokeFile.exists()) {
                         String[] xy = pairs[i].split(XY_SEPARATOR);
                         int x = Integer.parseInt(xy[0]);
                         int y = Integer.parseInt(xy[1]);
-
-                        // TODO: add Scaling to these calculations as well.
+                        // Add to offsets
                         offsetsFromCorner.add(new Point(x + spaceFromLeft,y + spaceFromTop));
 
-                        Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath());
+                        // Use previous sample size to create stroke sampled images
+                        Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath(),options);
+                        bitmap = Bitmap.createScaledBitmap(bitmap,(int)(options.outWidth*scaleX),
+                                (int)(options.outHeight*scaleY), false);
                         strokes.add(bitmap);
+                        // Modify the stroke bounds
+                        rawStrokeBounds.add(new RectF(x + spaceFromLeft, y + spaceFromTop,
+                                x + spaceFromLeft + bitmap.getWidth(), y + spaceFromTop + bitmap.getHeight()));
                     }
                 }
 

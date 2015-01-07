@@ -41,6 +41,7 @@ public class DrawActivity extends Activity {
             if(directory!=null){
                 ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
             }
+            this.finish();
         }
         return super.onOptionsItemSelected(item);
     }

@@ -35,6 +35,7 @@ public class ViewActivity extends Activity {
      * Size (in dp) of image thumbnails (square)
      */
     public static final int VIEW_IMAGE_SIZE = 90;
+    public static final int EDIT_CHAR_REQUEST = 1;
 
     /**
      * Memory cache to be used by this activity
@@ -166,12 +167,21 @@ public class ViewActivity extends Activity {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         // Open editing activity on the relevant file
                         Intent intent = new Intent(ViewActivity.this,EditDrawActivity.class);
-                        intent.putExtra(EditDrawActivity.FILE_EXTRA_NAME,((ImageAdapter)parent.
+                        intent.putExtra(EditDrawActivity.FILE_EXTRA_NAME, ((ImageAdapter) parent.
                                 getAdapter()).getFiles().get(position).getParentFile().getAbsolutePath());
-                        startActivity(intent);
+                        startActivityForResult(intent, EDIT_CHAR_REQUEST);
                     }
                 });
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode==RESULT_OK && requestCode == EDIT_CHAR_REQUEST){
+            String directory = data.getStringExtra(EditDrawActivity.DIRECTORY_RETURN_EXTRA);
+            memoryCache.remove(directory);
+            diskCache.remove(directory);
         }
     }
 

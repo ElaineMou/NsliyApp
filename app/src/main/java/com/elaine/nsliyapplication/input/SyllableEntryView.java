@@ -13,10 +13,14 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.RadioGroup;
 
+import com.elaine.nsliyapplication.EditDrawActivity;
 import com.elaine.nsliyapplication.R;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -37,11 +41,11 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
     /**
      * Separator between syllable and tone in text file.
      */
-    public static final String SYLLABLE_TONE_SEPARATOR = ".";
+    public static final String SYLLABLE_TONE_SEPARATOR = ",";
     /**
      * Separator between pronunciations in text file.
      */
-    public static final String PRONUNCIATION_SEPARATOR = ",";
+    public static final String PRONUNCIATION_SEPARATOR = ";";
     /**
      * List of pronunciations currently added by user.
      */
@@ -91,6 +95,13 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                 new Pronunciation.PronunciationAdapter(getContext(),pronunciations);
         GridView pronunciationsLayout = (GridView) view.findViewById(R.id.pronunciation_series);
         pronunciationsLayout.setAdapter(pronunciationAdapter);
+    }
+
+    @Override
+    protected void onAttachedToWindow(){
+        if(getContext() instanceof EditDrawActivity){
+            loadFromDirectory(((EditDrawActivity) getContext()).getDirectory());
+        }
     }
 
     @Override
@@ -189,6 +200,52 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
     }
 
     public void loadFromDirectory(File directory){
+        File syllables = new File(directory,SYLLABLE_FILE_NAME);
+        if(syllables.exists()) {
+            BufferedReader bufferedReader=null;
+            StringBuilder stringBuilder=null;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(syllables));
+                stringBuilder = new StringBuilder();
+                String line = bufferedReader.readLine();
 
+                while(line!=null){
+                    stringBuilder.append(line);
+                    line = bufferedReader.readLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally{
+                if(bufferedReader!=null){
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(stringBuilder!=null) {
+                pronunciations.clear();
+                String[] words = stringBuilder.toString().split(PRONUNCIATION_SEPARATOR);
+                for(String word: words){
+                    String[] syllableTone = word.split(SYLLABLE_TONE_SEPARATOR);
+                    if(syllableTone.length == 2){
+                        Pronunciation.Tone tone = Pronunciation.Tone.UNKNOWN;
+                        for(Pronunciation.Tone value: Pronunciation.Tone.values()){
+                            if(value.toString().equals(syllableTone[1])){
+                                tone = value;
+                            }
+                        }
+
+                        Pronunciation pronunciationToAdd = new Pronunciation(syllableTone[0],tone);
+                        pronunciations.add(pronunciationToAdd);
+                    }
+                }
+
+                GridView pronunciationsLayout = (GridView) findViewById(R.id.pronunciation_series);
+                ((Pronunciation.PronunciationAdapter) pronunciationsLayout.getAdapter())
+                        .notifyDataSetChanged();
+            }
+        }
     }
 }
