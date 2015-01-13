@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <GridView
+            android:id="@+id/view_grid"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:numColumns="auto_fit"
+            android:columnWidth="@dimen/view_activity_item_width"
+            android:horizontalSpacing="@dimen/view_activity_spacing"
+            android:verticalSpacing="@dimen/view_activity_spacing"
+            android:paddingTop="@dimen/view_grid_margin"
+            android:paddingLeft="@dimen/view_grid_margin"
+            android:paddingRight="@dimen/view_grid_margin"
+            android:paddingBottom="0dp"
+            android:background="@color/pale_green"
+            xmlns:android="http://schemas.android.com/apk/res/android">
+
+        </GridView>
+        <TextView
+            android:id="@+id/empty_message"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"
+            android:textColor="@color/dark_green"
+            android:textSize="@dimen/data_entry_font_size"
+            android:text="@string/empty_characters_message"
+            />
+    </RelativeLayout>
+
+    <com.elaine.nsliyapplication.words.BuildWordView
+        android:id="@+id/build_word_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/menu_green"/>
+</LinearLayout>

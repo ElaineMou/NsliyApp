@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -105,11 +104,11 @@ public class DrawView extends View {
     /**
      * Bounds of all strokes so far.
      */
-    ArrayList<RectF> rawStrokeBounds = new ArrayList<RectF>();
+    ArrayList<RectF> strokeBounds = new ArrayList<RectF>();
     /**
      * Bounds of character being written.
      */
-    RectF rawCharacterBounds;
+    RectF characterBounds;
 
     /**
      * Bitmap for displaying to user.
@@ -147,6 +146,8 @@ public class DrawView extends View {
      */
     private final RectF rectToUpdate = new RectF();
 
+    private boolean haveLoadedFromDirectory = false;
+
     public DrawView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -165,8 +166,9 @@ public class DrawView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh){
-        if(getContext() instanceof EditDrawActivity){
+        if(!haveLoadedFromDirectory && getContext() instanceof EditDrawActivity){
             loadFromDirectory(((EditDrawActivity) getContext()).getDirectory());
+            haveLoadedFromDirectory = true;
         }
     }
 
@@ -178,16 +180,14 @@ public class DrawView extends View {
         displayBitmap = null;
         strokes.clear();
         offsetsFromCorner.clear();
-        rawCharacterBounds = null;
-        rawStrokeBounds.clear();
+        characterBounds = null;
+        strokeBounds.clear();
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas){
-        Log.v("loadFromDirectory","onDrawing");
         if(displayBitmap !=null) {
-            Log.v("loadFromDirectory","onDrawing and not null");
             canvas.drawBitmap(displayBitmap, 0, 0, null);
         }
     }
@@ -214,8 +214,8 @@ public class DrawView extends View {
         float eventY = event.getY();
         int eventAction = event.getAction();
 
-        if(rawCharacterBounds == null){
-            rawCharacterBounds = new RectF(eventX, eventY, eventX, eventY);
+        if(characterBounds == null){
+            characterBounds = new RectF(eventX, eventY, eventX, eventY);
         }
 
         if(touchPoints.isEmpty() || eventAction != MotionEvent.ACTION_MOVE ||
@@ -332,23 +332,23 @@ public class DrawView extends View {
                             }
                             // Expand stroke bounds to include this event, save copy to bounds list
                             expandRectWithRect(lastStroke,rectToUpdate);
-                            rawStrokeBounds.add(new RectF(lastStroke));
                             // Find new stroke's boundaries within borders
-                            int x = (int) Math.max(lastStroke.left - MAX_STROKE_WIDTH, 0);
-                            int y = (int) Math.max(lastStroke.top - MAX_STROKE_WIDTH, 0);
-                            int newStrokeWidth = (int) Math.min(
-                                    lastStroke.width() + 2*MAX_STROKE_WIDTH, getWidth() - x);
-                            int newStrokeHeight = (int) Math.min(
-                                    lastStroke.height() + 2*MAX_STROKE_WIDTH, getHeight() - y);
+                            lastStroke.left = (int) Math.max(lastStroke.left - MAX_STROKE_WIDTH, 0);
+                            lastStroke.top = (int) Math.max(lastStroke.top - MAX_STROKE_WIDTH, 0);
+                            lastStroke.right = (int) Math.min(lastStroke.right + MAX_STROKE_WIDTH, getWidth());
+                            lastStroke.bottom = (int) Math.min(lastStroke.bottom + MAX_STROKE_WIDTH, getHeight());
+                            strokeBounds.add(new RectF(lastStroke));
+
                             // Excise stroke bounds from bitmap
                             Bitmap newStroke = Bitmap.createBitmap(currentStroke,
-                                    x,y, newStrokeWidth, newStrokeHeight);
+                                    (int) lastStroke.left, (int) lastStroke.top,
+                                    (int) lastStroke.width(), (int) lastStroke.height());
                             // Add new smaller stroke bitmap
                             strokes.add(newStroke);
-                            offsetsFromCorner.add(new Point(x,y));
+                            offsetsFromCorner.add(new Point(lastStroke.left,lastStroke.top));
                             currentStroke = null;
                             // Expand character bounds to include this event
-                            expandRectWithRect(rawCharacterBounds, lastStroke);
+                            expandRectWithRect(characterBounds, lastStroke);
                             invalidate();
                         }
 
@@ -479,27 +479,27 @@ public class DrawView extends View {
 
     public void undo() {
         // If any set is empty, clear all data of previous strokes.
-        if(strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()){
+        if(strokes.isEmpty() || strokeBounds.isEmpty() || offsetsFromCorner.isEmpty()){
             displayBitmap = null;
-            rawCharacterBounds = null;
+            characterBounds = null;
 
             strokes.clear();
-            rawStrokeBounds.clear();
+            strokeBounds.clear();
             offsetsFromCorner.clear();
         } else {
             //Remove last stroke from memory
             strokes.remove(strokes.size() - 1);
-            rawStrokeBounds.remove(rawStrokeBounds.size() - 1);
+            strokeBounds.remove(strokeBounds.size() - 1);
             offsetsFromCorner.remove(offsetsFromCorner.size() - 1);
             touchPoints.clear();
 
             // If any set is newly empty, clear all data of previous strokes.
-            if (strokes.isEmpty() || rawStrokeBounds.isEmpty() || offsetsFromCorner.isEmpty()) {
+            if (strokes.isEmpty() || strokeBounds.isEmpty() || offsetsFromCorner.isEmpty()) {
                 displayBitmap = null;
-                rawCharacterBounds = null;
+                characterBounds = null;
 
                 strokes.clear();
-                rawStrokeBounds.clear();
+                strokeBounds.clear();
                 offsetsFromCorner.clear();
             } else { // If there are still strokes on the screen
                 // Recreate displayBitmap with transparency, new canvas to draw onto displayBitmap with.
@@ -508,11 +508,11 @@ public class DrawView extends View {
                 displayCanvas.drawColor(Color.TRANSPARENT);
 
                 // Relocate raw character bounds, then redraw screen/expand bounds through all previous
-                relocateRect(rawCharacterBounds, rawStrokeBounds.get(0).left, rawStrokeBounds.get(0).top);
+                relocateRect(characterBounds, strokeBounds.get(0).left, strokeBounds.get(0).top);
                 for (int i = 0; i < strokes.size(); i++) {
                     displayCanvas.drawBitmap(strokes.get(i),
                             offsetsFromCorner.get(i).getX(), offsetsFromCorner.get(i).getY(), null);
-                    expandRectWithRect(rawCharacterBounds, rawStrokeBounds.get(i));
+                    expandRectWithRect(characterBounds, strokeBounds.get(i));
                 }
             }
         }
@@ -572,21 +572,10 @@ public class DrawView extends View {
                             }
                         }
 
-                        RectF realCharacterBounds = new RectF();
-
-                        // Find new character's boundaries within borders
-                        realCharacterBounds.left = Math.max(
-                                rawCharacterBounds.left - MAX_STROKE_WIDTH, 0);
-                        realCharacterBounds.top = Math.max(
-                                rawCharacterBounds.top - MAX_STROKE_WIDTH, 0);
-                        realCharacterBounds.right = Math.min(
-                                rawCharacterBounds.right + MAX_STROKE_WIDTH, getWidth());
-                        realCharacterBounds.bottom = Math.min(
-                                rawCharacterBounds.bottom + MAX_STROKE_WIDTH, getHeight());
                         // Excise character from screen bitmap
                         Bitmap characterImage = Bitmap.createBitmap(displayBitmap,
-                                (int) realCharacterBounds.left, (int) realCharacterBounds.top,
-                                (int) realCharacterBounds.width(), (int) realCharacterBounds.height());
+                                (int) characterBounds.left, (int) characterBounds.top,
+                                (int) characterBounds.width(), (int) characterBounds.height());
 
                         // Make file location for character image
                         File imageFile = new File(directory, DISPLAY_IMAGE_NAME);
@@ -607,9 +596,9 @@ public class DrawView extends View {
                         size = offsetsFromCorner.size();
                         for (int i = 0; i < size; i++) {
                             Point coordinates = offsetsFromCorner.get(i);
-                            strBuilder.append((int) (coordinates.getX() - realCharacterBounds.left))
+                            strBuilder.append((int) (coordinates.getX() - characterBounds.left))
                                     .append(XY_SEPARATOR)
-                                    .append((int) (coordinates.getY() - realCharacterBounds.top))
+                                    .append((int) (coordinates.getY() - characterBounds.top))
                                     .append(OFFSETS_SEPARATOR);
                         }
 
@@ -769,7 +758,7 @@ public class DrawView extends View {
                 displayCanvas.drawBitmap(display,spaceFromLeft, spaceFromTop, null);
 
                 // Set character bounds
-                rawCharacterBounds = new RectF(spaceFromLeft,spaceFromTop,
+                characterBounds = new RectF(spaceFromLeft,spaceFromTop,
                         spaceFromLeft + width, spaceFromTop + height);
 
                 String[] pairs = stringBuilder.toString().split(OFFSETS_SEPARATOR);
@@ -781,7 +770,7 @@ public class DrawView extends View {
                         int x = Integer.parseInt(xy[0]);
                         int y = Integer.parseInt(xy[1]);
                         // Add to offsets
-                        offsetsFromCorner.add(new Point(x + spaceFromLeft,y + spaceFromTop));
+                        offsetsFromCorner.add(new Point(x*scaleX + spaceFromLeft,y*scaleY + spaceFromTop));
 
                         // Use previous sample size to create stroke sampled images
                         Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath(),options);
@@ -789,7 +778,7 @@ public class DrawView extends View {
                                 (int)(options.outHeight*scaleY), false);
                         strokes.add(bitmap);
                         // Modify the stroke bounds
-                        rawStrokeBounds.add(new RectF(x + spaceFromLeft, y + spaceFromTop,
+                        strokeBounds.add(new RectF(x + spaceFromLeft, y + spaceFromTop,
                                 x + spaceFromLeft + bitmap.getWidth(), y + spaceFromTop + bitmap.getHeight()));
                     }
                 }

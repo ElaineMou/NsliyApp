@@ -8,6 +8,10 @@ import android.widget.TextView;
 
 import com.elaine.nsliyapplication.R;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -82,6 +86,54 @@ public class Pronunciation {
     public Pronunciation(String syllable, Tone tone){
         this.syllable = syllable;
         this.tone = tone;
+    }
+
+    public static ArrayList<Pronunciation> getListFromDirectory(File directory){
+        File syllables = new File(directory,SyllableEntryView.SYLLABLE_FILE_NAME);
+        ArrayList<Pronunciation> list = new ArrayList<Pronunciation>();
+
+        if(syllables.exists()) {
+            BufferedReader bufferedReader = null;
+            StringBuilder stringBuilder = null;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(syllables));
+                stringBuilder = new StringBuilder();
+                String line = bufferedReader.readLine();
+
+                while (line != null) {
+                    stringBuilder.append(line);
+                    line = bufferedReader.readLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (stringBuilder != null) {
+                String[] words = stringBuilder.toString().split(SyllableEntryView.PRONUNCIATION_SEPARATOR);
+                for (String word : words) {
+                    String[] syllableTone = word.split(SyllableEntryView.SYLLABLE_TONE_SEPARATOR);
+                    if (syllableTone.length == 2) {
+                        Pronunciation.Tone tone = Pronunciation.Tone.UNKNOWN;
+                        for (Pronunciation.Tone value : Pronunciation.Tone.values()) {
+                            if (value.toString().equals(syllableTone[1])) {
+                                tone = value;
+                            }
+                        }
+
+                        list.add(new Pronunciation(syllableTone[0], tone));
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     /**

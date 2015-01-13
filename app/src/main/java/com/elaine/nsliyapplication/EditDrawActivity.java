@@ -43,19 +43,22 @@ public class EditDrawActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_revert) {
-            ( (DrawView) findViewById(R.id.draw_view) ).loadFromDirectory(directory);
+            ((DrawView) findViewById(R.id.draw_view)).loadFromDirectory(directory);
             ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).loadFromDirectory(directory);
             return true;
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
         } else if (id == R.id.action_save){
             if(directory!=null){
-                ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, directory);
-                ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(DIRECTORY_RETURN_EXTRA,directory.getName());
-                setResult(RESULT_OK,returnIntent);
-                finish();
+                File save = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, directory);
+                if(save!=null) {
+                    ((SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
+
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(DIRECTORY_RETURN_EXTRA, directory.getName());
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                }
             }
         }
         return super.onOptionsItemSelected(item);

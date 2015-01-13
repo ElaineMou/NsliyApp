@@ -13,4 +13,5 @@
     <dimen name="view_activity_item_width">90dp</dimen>
     <dimen name="view_activity_spacing">10dp</dimen>
     <dimen name="view_grid_margin">10dp</dimen>
+    <dimen name="button_font_size">20sp</dimen>
 </resources>

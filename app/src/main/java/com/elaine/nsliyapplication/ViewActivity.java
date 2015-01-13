@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
- * TODO: Make sure that deleting an item clears it from cache as well!!!
+ * Displays thumbnails of all characters on file.
  * Created by Elaine on 12/27/2014.
  */
 public class ViewActivity extends Activity {

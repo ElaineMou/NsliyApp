@@ -31,6 +31,8 @@ public class MainMenuActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.words_button:
+                intent = new Intent(this, ViewWordActivity.class);
+                startActivity(intent);
                 break;
         }
     }

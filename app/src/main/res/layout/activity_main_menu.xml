@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/main_menu_button_size"
-        android:text="@string/view_button"/>
+        android:text="@string/view_char_button"/>
     <Button
         android:id="@+id/words_button"
         android:layout_width="match_parent"

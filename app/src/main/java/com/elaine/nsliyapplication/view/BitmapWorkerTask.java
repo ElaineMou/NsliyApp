@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -47,6 +48,13 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
         reqHeight = height;
         memoryCache = cache;
         diskCache = diskLruImageCache;
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                Log.e("TAG","Uncaught Exception:",paramThrowable);
+            }
+        });
     }
 
     @Override

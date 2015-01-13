@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/pronunciation_series"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:horizontalSpacing="@dimen/pronunciation_spacing"
+            android:verticalSpacing="@dimen/pronunciation_spacing"/>
+    </HorizontalScrollView>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:horizontalSpacing="@dimen/view_activity_spacing"
+        android:verticalSpacing="@dimen/view_activity_spacing">
+        <LinearLayout
+            android:id="@+id/thumbnail_series"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:horizontalSpacing="@dimen/view_activity_spacing"
+            android:verticalSpacing="@dimen/view_activity_spacing"/>
+    </HorizontalScrollView>
+</LinearLayout>
