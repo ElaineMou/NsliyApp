@@ -88,6 +88,19 @@ public class Pronunciation {
         this.tone = tone;
     }
 
+    @Override
+    public boolean equals(Object otherObject){
+        if(otherObject == null || !(otherObject instanceof Pronunciation)){
+            return false;
+        }
+
+        Pronunciation other = (Pronunciation) otherObject;
+        if(this.syllable == null){
+            return other.syllable == null && this.tone == other.tone;
+        }
+        return this.syllable.equals(other.syllable) && this.tone == other.tone;
+    }
+
     public static ArrayList<Pronunciation> getListFromDirectory(File directory){
         File syllables = new File(directory,SyllableEntryView.SYLLABLE_FILE_NAME);
         ArrayList<Pronunciation> list = new ArrayList<Pronunciation>();

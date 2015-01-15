@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.elaine.nsliyapplication.view.BitmapLruCache;
 import com.elaine.nsliyapplication.view.DiskLruImageCache;
@@ -41,11 +42,16 @@ public class ViewWordActivity extends Activity {
      * Subdirectory name for the disk cache
      */
     private static final String DISK_CACHE_SUBDIR = "thumbnails";
+    /**
+     * Directory where character folders are located.
+     */
+    private File charsDirectory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_words);
+        charsDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         // Recover memory cache if previous instance existed
         RetainViewFragment retainViewFragment = RetainViewFragment
@@ -126,8 +132,12 @@ public class ViewWordActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_add) {
-            Intent intent = new Intent(this,CreateWordActivity.class);
-            startActivity(intent);
+            if(charsDirectory.list().length > 0) {
+                Intent intent = new Intent(this, CreateWordActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this,R.string.no_chars_message,Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

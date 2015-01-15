@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +40,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -79,6 +82,8 @@ public class CreateWordActivity extends Activity {
      */
     private static final String DISK_CACHE_SUBDIR = "thumbnails";
 
+    private float scale;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +103,8 @@ public class CreateWordActivity extends Activity {
         // Initialize new disk cache for activity
         File cacheDir = getDiskCacheDir(this, DISK_CACHE_SUBDIR);
         new InitDiskCacheTask().execute(cacheDir);
+
+        scale = getResources().getDisplayMetrics().density;
     }
 
     /**
@@ -147,24 +154,21 @@ public class CreateWordActivity extends Activity {
 
             TextView textView = (TextView) findViewById(R.id.empty_message);
             // If none, display empty message
-            if(files.isEmpty()){
-                textView.setVisibility(View.VISIBLE);
-            } else { // Otherwise, add all files of display images in the list
-                textView.setVisibility(View.INVISIBLE);
+            textView.setVisibility(View.INVISIBLE);
 
-                // Make a new adapter of these files and the current memory and disk caches
-                ImageAdapter imageAdapter = new ImageAdapter(this, files, memoryCache, diskCache);
-                gridView.setAdapter(imageAdapter);
+            // Make a new adapter of these files and the current memory and disk caches
+            ImageAdapter imageAdapter = new ImageAdapter(this, files, memoryCache, diskCache);
+            gridView.setAdapter(imageAdapter);
 
-                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        addCharacter(((ImageView) ((FrameLayout)view).getChildAt(0)).getDrawable(),
-                                ((ImageAdapter) parent.getAdapter()).getFiles().get(position)
-                                        .getParentFile());
-                    }
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    addCharacter(((ImageView) ((FrameLayout)view).getChildAt(0)).getDrawable(),
+                            ((ImageAdapter) parent.getAdapter()).getFiles().get(position)
+                                    .getParentFile());
+                }
                 });
-            }
+
         }
     }
 
@@ -224,35 +228,48 @@ public class CreateWordActivity extends Activity {
     }
 
     private void saveToFile() throws JSONException, IOException {
-        File file = generateFileName();
+        if(savedPronunciations!=null) {
+            File file = generateFileName();
 
-        JSONObject jsonObject = new JSONObject();
-        JSONArray characterNames = new JSONArray();
-        for(String key: keys) {
-            characterNames.put(key);
-        }
-        JSONArray pronunciations = new JSONArray();
-        for(Pronunciation pronunciation: savedPronunciations){
-            if(pronunciation!=null) {
-                pronunciations.put(pronunciation.syllable + SyllableEntryView.SYLLABLE_TONE_SEPARATOR
-                        + pronunciation.tone);
-            } else {
-                pronunciations.put(DEFAULT_UNKNOWN_STRING + SyllableEntryView.SYLLABLE_TONE_SEPARATOR
-                        + Pronunciation.Tone.UNKNOWN.toString());
+            JSONObject jsonObject = new JSONObject();
+            JSONArray characterNames = new JSONArray();
+            for (String key : keys) {
+                characterNames.put(key);
             }
-        }
+            JSONArray pronunciations = new JSONArray();
+            for (Pronunciation pronunciation : savedPronunciations) {
+                if (pronunciation != null) {
+                    pronunciations.put(pronunciation.syllable + SyllableEntryView.SYLLABLE_TONE_SEPARATOR
+                            + pronunciation.tone);
+                } else {
+                    pronunciations.put(DEFAULT_UNKNOWN_STRING + SyllableEntryView.SYLLABLE_TONE_SEPARATOR
+                            + Pronunciation.Tone.UNKNOWN.toString());
+                }
+            }
 
-        jsonObject.put(JSON_KEY_CHARACTERS,characterNames);
-        jsonObject.put(JSON_KEY_PRONUNCIATIONS,pronunciations);
+            jsonObject.put(JSON_KEY_CHARACTERS, characterNames);
+            jsonObject.put(JSON_KEY_PRONUNCIATIONS, pronunciations);
 
-        FileWriter fileWriter = new FileWriter(file);
-        try {
-            fileWriter.write(jsonObject.toString());
-        } catch (IOException e){
-            e.printStackTrace();
-        } finally {
-            fileWriter.flush();
-            fileWriter.close();
+            FileWriter fileWriter = new FileWriter(file);
+            try {
+                fileWriter.write(jsonObject.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                fileWriter.flush();
+                fileWriter.close();
+            }
+
+            HashSet<String> stringHashSet = new HashSet<String>();
+            stringHashSet.addAll(keys);
+            SharedPreferences sharedPreferences = getSharedPreferences(DrawActivity.PREFERENCES_FILE_KEY, MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            for (String string : stringHashSet) {
+                int currentValue = sharedPreferences.getInt(string, 0);
+                editor.putInt(string, currentValue + 1);
+                Log.v("CreateWordActivity", "Put " + string + "," + (currentValue + 1));
+            }
+            editor.commit();
         }
     }
 
@@ -305,7 +322,7 @@ public class CreateWordActivity extends Activity {
         Resources resources = getResources();
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                (int)(ViewActivity.VIEW_IMAGE_SIZE*scale - 10), LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(5, 5, 5, 5);
         textView.setLayoutParams(params);
         textView.setBackgroundColor(resources.getColor(R.color.pale_green));

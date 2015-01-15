@@ -12,6 +12,8 @@ import java.io.File;
 
 public class DrawActivity extends Activity {
 
+    public static final String PREFERENCES_FILE_KEY = "preferencesKey";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

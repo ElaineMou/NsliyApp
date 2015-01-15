@@ -71,7 +71,9 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
         if(thumbnail == null){
             thumbnail = decodeThumbnail(file);
         }
-        addBitmapToCaches(key, thumbnail);
+        if(thumbnail!=null) {
+            addBitmapToCaches(key, thumbnail);
+        }
         return thumbnail;
     }
 
@@ -212,7 +214,10 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
         options.inJustDecodeBounds = false;
         Bitmap sampleBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(),options);
         // Return scaled bitmap of thumbnail size
-        return Bitmap.createScaledBitmap(sampleBitmap,width,height, false);
+        if(sampleBitmap!=null) {
+            return Bitmap.createScaledBitmap(sampleBitmap, width, height, false);
+        }
+        return null;
     }
 
     /**

@@ -16,13 +16,13 @@
     <string name="second_tone">2</string>
     <string name="third_tone">3</string>
     <string name="fourth_tone">4</string>
-    <string name="neutral_tone">None</string>
+    <string name="neutral_tone">Neutral</string>
     <string name="unknown_tone">\?\?</string>
     <string name="draw_button">Draw a New Character</string>
     <string name="view_char_button">View Characters</string>
     <string name="save_button">Save</string>
     <string name="add_button">Add</string>
-    <string name="empty_characters_message">No characters created.</string>
+    <string name="empty_characters_message">No characters created.\nHit + to make one.</string>
     <string name="action_add">Add</string>
     <string name="title_activity_view">View</string>
     <string name="delete_character_dialog">Delete this character?</string>
@@ -38,5 +38,10 @@
     <string name="view_button">View</string>
     <string name="delete_button">Delete</string>
     <string name="title_activity_view_words">Words</string>
+    <string name="deleted_word_toast">Deleted Word</string>
+    <string name="empty_words_message">No words created.\nHit + to make one.</string>
+    <string name="meaning">Meaning:</string>
+    <string name="meaning_hint">Enter meaning</string>
+    <string name="no_chars_message">No characters available.</string>
 
 </resources>

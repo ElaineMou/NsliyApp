@@ -12,7 +12,7 @@
         android:horizontalSpacing="@dimen/view_activity_spacing"
         android:verticalSpacing="@dimen/view_activity_spacing"
         android:padding="@dimen/view_grid_margin"
-        android:background="@color/pale_green"
+        android:background="@color/light_gray"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     </GridView>
@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:visibility="invisible"
         android:layout_centerInParent="true"
+        android:gravity="center"
         android:textColor="@color/dark_green"
         android:textSize="@dimen/data_entry_font_size"
         android:text="@string/empty_characters_message"

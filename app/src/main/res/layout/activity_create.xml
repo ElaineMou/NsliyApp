@@ -19,7 +19,7 @@
             android:paddingLeft="@dimen/view_grid_margin"
             android:paddingRight="@dimen/view_grid_margin"
             android:paddingBottom="0dp"
-            android:background="@color/pale_green"
+            android:background="@color/light_gray"
             xmlns:android="http://schemas.android.com/apk/res/android">
 
         </GridView>

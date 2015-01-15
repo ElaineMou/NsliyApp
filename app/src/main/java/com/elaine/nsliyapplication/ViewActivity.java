@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -136,21 +138,33 @@ public class ViewActivity extends Activity {
                     public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position,
                                                    long id) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ViewActivity.this);
-                        builder.setMessage(R.string.delete_character_dialog)
-                                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if(((ImageAdapter) parent.getAdapter()).remove(position)) {
-                                            // Notify user through short Toast
-                                            Toast.makeText(ViewActivity.this, R.string.deleted_toast,
-                                                    Toast.LENGTH_SHORT).show();
-                                            // Display empty message when all files are gone
-                                            if(((ImageAdapter) parent.getAdapter()).filesEmpty()){
-                                                findViewById(R.id.empty_message).setVisibility(View.VISIBLE);
-                                            }
-                                        }
+                        builder.setTitle(R.string.delete_character_dialog);
+
+                        SharedPreferences sharedPreferences = getSharedPreferences(
+                                DrawActivity.PREFERENCES_FILE_KEY,MODE_PRIVATE);
+                        String key = ((ImageAdapter)parent.getAdapter()).getFiles().get(position).getParentFile().getName();
+                        int uses = sharedPreferences.getInt(key,0);
+                        Log.v("ViewActivity","Got " + key + "," + uses );
+                        if( uses == 1){
+                            builder.setMessage("One word contains this character.");
+                        } else if (uses > 1){
+                            builder.setMessage(uses + " words contain this character.");
+                        }
+
+                        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (((ImageAdapter) parent.getAdapter()).remove(position)) {
+                                    // Notify user through short Toast
+                                    Toast.makeText(ViewActivity.this, R.string.deleted_toast,
+                                            Toast.LENGTH_SHORT).show();
+                                    // Display empty message when all files are gone
+                                    if (((ImageAdapter) parent.getAdapter()).filesEmpty()) {
+                                        findViewById(R.id.empty_message).setVisibility(View.VISIBLE);
                                     }
-                                })
+                                }
+                            }
+                        })
                                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {

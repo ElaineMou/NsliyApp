@@ -153,7 +153,9 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                         // Add new PronunciationView to grid using input data
                         Pronunciation pronunciation =
                                 new Pronunciation(syllable, tone);
-                        pronunciations.add(pronunciation);
+                        if(!pronunciations.contains(pronunciation)) {
+                            pronunciations.add(pronunciation);
+                        }
 
                         GridView gridView = (GridView) findViewById(R.id.pronunciation_series);
                         ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();

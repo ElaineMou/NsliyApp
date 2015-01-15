@@ -4,4 +4,8 @@
     <color name="menu_green">#8bcb81</color>
     <color name="pale_green">#c6f4be</color>
     <color name="dark_green">#39845e</color>
+    <color name="cream">#F5F5DC</color>
+    <color name="light_gray">#D4D4D4</color>
+    <color name="medium_gray">#B5B5B5</color>
+    <color name="dark_gray_text">#4A4A4A</color>
 </resources>

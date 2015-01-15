@@ -6,26 +6,28 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/view_grid_margin"
     android:layout_marginTop="@dimen/view_grid_margin"
-    android:background="@color/menu_green">
+    android:background="@color/light_gray">
     <HorizontalScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="3">
-        <LinearLayout
+        <RelativeLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <LinearLayout
                 android:id="@+id/thumbnails"
                 android:orientation="horizontal"
+                android:layout_alignParentTop="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <LinearLayout
                 android:id="@+id/pronunciations"
                 android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-        </LinearLayout>
+        </RelativeLayout>
     </HorizontalScrollView>
     <LinearLayout
         android:orientation="vertical"
@@ -33,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
         <Button
-            android:id="@+id/view_word_button"
+            android:id="@+id/review_word_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/button_font_size"

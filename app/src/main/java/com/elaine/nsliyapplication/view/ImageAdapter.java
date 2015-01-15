@@ -3,7 +3,6 @@ package com.elaine.nsliyapplication.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +27,7 @@ public class ImageAdapter extends BaseAdapter {
     private final float scale;
     private DiskLruImageCache diskCache;
     private BitmapLruCache memoryCache;
+    private int backgroundColorId;
 
     public ImageAdapter(Context context, ArrayList<File> files, BitmapLruCache lruCache,
                         DiskLruImageCache diskLruImageCache){
@@ -41,6 +41,7 @@ public class ImageAdapter extends BaseAdapter {
         scale = context.getResources().getDisplayMetrics().density;
         this.memoryCache = lruCache;
         this.diskCache = diskLruImageCache;
+        backgroundColorId = context.getResources().getColor(R.color.cream);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class ImageAdapter extends BaseAdapter {
             int frameSize = (int) (ViewActivity.VIEW_IMAGE_SIZE*scale);
             imageFrame.setLayoutParams(new GridView.LayoutParams(frameSize,frameSize));
             imageFrame.setForegroundGravity(Gravity.CENTER);
-            imageFrame.setBackgroundColor(Color.LTGRAY);
+            imageFrame.setBackgroundColor(backgroundColorId);
         } else {
             imageFrame = (FrameLayout) convertView;
             imageFrame.removeAllViews();

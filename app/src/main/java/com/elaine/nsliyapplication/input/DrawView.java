@@ -1,6 +1,7 @@
 package com.elaine.nsliyapplication.input;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,11 +10,14 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.elaine.nsliyapplication.DrawActivity;
 import com.elaine.nsliyapplication.EditDrawActivity;
+import com.elaine.nsliyapplication.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Inspired by Eric Burke's SquareUp post.
@@ -29,6 +32,10 @@ import java.util.Random;
  */
 public class DrawView extends View {
 
+    /**
+     * Key for SharedPreferences for current number for character directories.
+     */
+    public static final String PREFS_KEY_LAST_CHAR_NUM = "lastCharNumKey";
     /**
      * Name of text file for offsets data
      */
@@ -158,7 +165,7 @@ public class DrawView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeWidth(5f);
 
-        setBackgroundColor(Color.WHITE);
+        setBackgroundColor(context.getResources().getColor(R.color.cream));
 
         redPaint = new Paint(paint);
         redPaint.setColor(Color.RED);
@@ -461,20 +468,26 @@ public class DrawView extends View {
         return false;
     }
 
-    public static File generateDirectoryName(Context context){
-        int n=0;
-        Random random = new Random();
+    public static int generateDirectoryNumber(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(
+                DrawActivity.PREFERENCES_FILE_KEY,Context.MODE_PRIVATE);
+        int n = sharedPreferences.getInt(PREFS_KEY_LAST_CHAR_NUM,0);
+
         String directoryName;
         File directory;
+
         // Guarantee a unique folder for new character
         do {
-            n += random.nextInt(100);
+            n++;
             directoryName = CHARACTER_PREFIX + n;
             directory = new File(context.getExternalFilesDir(
                     Environment.DIRECTORY_PICTURES), directoryName);
         } while (directory.exists());
 
-        return directory;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(PREFS_KEY_LAST_CHAR_NUM,n).commit();
+
+        return n;
     }
 
     public void undo() {
@@ -527,6 +540,8 @@ public class DrawView extends View {
      */
     public File saveCharacter(Context context, File directory){
         boolean success = false;
+        boolean editing = (directory != null);
+        int newCharNum=0;
         if(strokes.size() > 0) { // If we can write to external storage
             if(isExternalStorageWritable()) {
                 // Check there are strokes and data matches up
@@ -534,7 +549,10 @@ public class DrawView extends View {
                     // Get the directory for the app's private pictures directory.
 
                     if(directory==null){
-                        directory = generateDirectoryName(context);
+                        newCharNum = generateDirectoryNumber(context);
+                        String directoryName = CHARACTER_PREFIX + newCharNum;
+                        directory = new File(context.getExternalFilesDir(
+                                Environment.DIRECTORY_PICTURES), directoryName);
                         if(directory.mkdir()){
                             success = true;
                         }
@@ -624,6 +642,13 @@ public class DrawView extends View {
             CharSequence text;
             if(success) {
                 text = "Successfully saved character.";
+                if(!editing) {
+                    SharedPreferences.Editor editor = context.getSharedPreferences
+                            (DrawActivity.PREFERENCES_FILE_KEY, Context.MODE_PRIVATE).edit();
+                    Log.v("DrawView", "Put: " + directory.getName() + "," + 0);
+                    editor.putInt(directory.getName(), 0).commit();
+                    editor.putInt(PREFS_KEY_LAST_CHAR_NUM,newCharNum).commit();
+                }
             } else {
                 text = "Failed to save.";
                 // Clear the folder if incomplete
