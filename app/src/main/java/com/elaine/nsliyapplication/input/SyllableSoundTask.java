@@ -10,7 +10,7 @@ import android.widget.Toast;
  * Execute takes two strings - the syllable, and the tone, which must be 1-4 or else is neutral.
  * Created by Elaine on 1/4/2015.
  */
-class SyllableSoundTask extends AsyncTask<String,Void,Boolean> {
+public class SyllableSoundTask extends AsyncTask<String,Void,Boolean> {
     MediaPlayer mediaPlayer;
     Context context;
 

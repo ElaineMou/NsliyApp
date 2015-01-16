@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_gray">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:background="@color/menu_green">
+        <Button
+            android:id="@+id/back_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_media_rew"/>
+        <Button
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_media_previous"/>
+        <Button
+            android:id="@+id/forward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_media_next" />
+        <Button
+            android:id="@+id/forward_forward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_media_ff" />
+    </LinearLayout>
+    <GridView
+        android:id="@+id/chars_grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/view_word_padding"
+        android:numColumns="auto_fit"
+        android:gravity="center_horizontal"
+        android:verticalSpacing="@dimen/view_activity_spacing"
+        android:background="@color/pale_green"/>
+    <TextView
+        android:id="@+id/meaning_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/dark_green"
+        android:textSize="@dimen/data_entry_font_size"
+        android:text="@string/meaning"/>
+    <TextView
+        android:id="@+id/meaning_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        android:textColor="@color/dark_gray_text"
+        android:textSize="@dimen/data_entry_font_size"
+        android:text="@string/no_meaning"/>
+
+</LinearLayout>

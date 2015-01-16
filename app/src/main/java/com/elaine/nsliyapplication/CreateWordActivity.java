@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -56,6 +57,7 @@ public class CreateWordActivity extends Activity {
     public static final String WORD_PREFIX = "word";
     public static final String JSON_KEY_CHARACTERS = "characters";
     public static final String JSON_KEY_PRONUNCIATIONS = "pronunciations";
+    public static final String JSON_KEY_MEANING = "meaning";
     public static final String TEXT_FILE_TYPE = ".txt";
     /**
      * Memory cache to be used by this activity
@@ -168,7 +170,6 @@ public class CreateWordActivity extends Activity {
                                     .getParentFile());
                 }
                 });
-
         }
     }
 
@@ -247,8 +248,11 @@ public class CreateWordActivity extends Activity {
                 }
             }
 
+            String meaning = ((EditText) findViewById(R.id.meaning_edit_text)).getText().toString();
+
             jsonObject.put(JSON_KEY_CHARACTERS, characterNames);
             jsonObject.put(JSON_KEY_PRONUNCIATIONS, pronunciations);
+            jsonObject.put(JSON_KEY_MEANING, meaning);
 
             FileWriter fileWriter = new FileWriter(file);
             try {

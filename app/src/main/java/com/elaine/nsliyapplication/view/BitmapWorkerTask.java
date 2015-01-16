@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.elaine.nsliyapplication.R;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 
@@ -96,16 +98,16 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap bitmap){
-        if(isCancelled()){
-            bitmap = null;
-        }
-
-        // Ensure this is the task associated with the ImageView
-        if(imageViewReference!=null && bitmap !=null){
-            final ImageView imageView = imageViewReference.get();
-            final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
-            if(this == bitmapWorkerTask && imageView != null){
-                imageView.setImageBitmap(bitmap);
+        if(!isCancelled()) {
+            if (imageViewReference != null) {
+                final ImageView imageView = imageViewReference.get();
+                final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+                if (this == bitmapWorkerTask && imageView != null) {
+                    if(bitmap == null){
+                        bitmap = BitmapFactory.decodeResource(imageViewReference.get().getContext().getResources(), R.drawable.question_mark);
+                    }
+                    imageView.setImageBitmap(bitmap);
+                }
             }
         }
     }
