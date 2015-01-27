@@ -1,6 +1,5 @@
 package com.elaine.nsliyapplication;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,13 +8,16 @@ import android.view.MenuItem;
 import com.elaine.nsliyapplication.input.DrawView;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
 
+import org.json.JSONException;
+
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Used to edit previously written characters.
  * Created by Elaine on 1/4/2015.
  */
-public class EditDrawActivity extends Activity {
+public class EditDrawActivity extends BaseActivity {
 
     public static final String FILE_EXTRA_NAME = "fileName";
     public static final String DIRECTORY_RETURN_EXTRA = "directory";
@@ -26,6 +28,7 @@ public class EditDrawActivity extends Activity {
         super.onCreate(savedInstanceState);
         directory = new File(getIntent().getStringExtra(FILE_EXTRA_NAME));
         setContentView(R.layout.activity_draw);
+        super.onCreateDrawer();
         setResult(RESULT_CANCELED);
     }
 
@@ -43,14 +46,25 @@ public class EditDrawActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_revert) {
-            ((DrawView) findViewById(R.id.draw_view)).loadFromDirectory(directory);
+            try {
+                ((DrawView) findViewById(R.id.draw_view)).loadFromDirectory(directory);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).loadFromDirectory(directory);
             return true;
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
         } else if (id == R.id.action_save){
             if(directory!=null){
-                File save = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, directory);
+                File save = null;
+                try {
+                    save = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, directory);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if(save!=null) {
                     ((SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
 

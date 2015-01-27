@@ -4,4 +4,7 @@
     <item name="tone" type="id">tone</item>
     <item name="delete_button" type="id">delete_button</item>
     <item name="save_button" type="id">save_button</item>
+    <item name="words_button" type="id">words_button</item>
+    <item name="drawer_list" type="id">drawer_list</item>
+    <item name="drawer_layout" type="id">drawer_layout</item>
 </resources>

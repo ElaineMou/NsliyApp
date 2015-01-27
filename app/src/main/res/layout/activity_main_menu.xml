@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#8bcb81">
+    android:background="@color/pale_green">
 
     <ImageView
         android:layout_width="match_parent"
@@ -14,17 +15,14 @@
         android:scaleType="fitStart"
         android:adjustViewBounds="true"/>
 
-    <Button
-        android:id="@+id/view_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/main_menu_button_size"
-        android:text="@string/view_char_button"/>
-    <Button
-        android:id="@+id/words_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/main_menu_button_size"
-        android:text="@string/words_button"/>
+    <ListView
+        android:id="@id/drawer_list"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@color/dark_green"
+        android:dividerHeight="1dp"
+        android:background="@color/pale_green"/>
 
-</LinearLayout>
+</android.support.v4.widget.DrawerLayout>

@@ -1,6 +1,5 @@
 package com.elaine.nsliyapplication;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,9 +7,12 @@ import android.view.MenuItem;
 import com.elaine.nsliyapplication.input.DrawView;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
 
-import java.io.File;
+import org.json.JSONException;
 
-public class DrawActivity extends Activity {
+import java.io.File;
+import java.io.IOException;
+
+public class DrawActivity extends BaseActivity {
 
     public static final String PREFERENCES_FILE_KEY = "preferencesKey";
 
@@ -18,6 +20,7 @@ public class DrawActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
+        super.onCreateDrawer();
     }
 
     @Override
@@ -39,7 +42,14 @@ public class DrawActivity extends Activity {
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
         } else if (id == R.id.action_save){
-            File directory = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, null);
+            File directory = null;
+            try {
+                directory = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, null);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if(directory!=null){
                 ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
             }

@@ -44,5 +44,7 @@
     <string name="meaning_hint">Enter meaning</string>
     <string name="no_chars_message">No characters available.</string>
     <string name="no_meaning">No meaning given.</string>
+    <string name="menu">Menu</string>
+    <string name="drawer_open">Menu</string>
 
 </resources>

@@ -1,26 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_light">
-
-    <ListView
-        android:id="@+id/list"
+    android:background="@color/pale_green">
+    <RelativeLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/view_word_padding"
-        android:background="@color/light_gray"/>
-    <TextView
-        android:id="@+id/empty_message"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:visibility="invisible"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:textColor="@color/dark_green"
-        android:textSize="@dimen/data_entry_font_size"
-        android:text="@string/empty_words_message"
-        />
-</RelativeLayout>
+        android:layout_height="match_parent"
+        android:background="@android:color/background_light">
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/view_word_padding"
+            android:background="@color/light_gray"/>
+        <TextView
+            android:id="@+id/empty_message"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:textColor="@color/dark_green"
+            android:textSize="@dimen/data_entry_font_size"
+            android:text="@string/empty_words_message"
+            />
+    </RelativeLayout>
+    <ListView
+        android:id="@id/drawer_list"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@color/dark_green"
+        android:dividerHeight="1dp"
+        android:background="@color/pale_green"/>
+
+</android.support.v4.widget.DrawerLayout>

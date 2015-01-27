@@ -351,7 +351,6 @@ public class WordAdapter extends BaseAdapter {
             }
 
             if (stringBuilder != null) {
-                File picturesDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                 JSONObject jsonObject = new JSONObject(stringBuilder.toString());
                 JSONArray jsonArray = jsonObject.getJSONArray(CreateWordActivity.JSON_KEY_PRONUNCIATIONS);
                 int length = jsonArray.length();

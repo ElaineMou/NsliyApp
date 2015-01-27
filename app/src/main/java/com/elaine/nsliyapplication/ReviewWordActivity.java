@@ -1,26 +1,19 @@
 package com.elaine.nsliyapplication;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.elaine.nsliyapplication.input.Pronunciation;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
 import com.elaine.nsliyapplication.words.ReviewAdapter;
-import com.elaine.nsliyapplication.words.ReviewCharView;
-import com.elaine.nsliyapplication.words.WordAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +25,7 @@ import java.util.ArrayList;
  * Activity allows review of words by step-by-step process.
  * Created by Elaine on 1/14/2015.
  */
-public class ReviewWordActivity extends Activity {
+public class ReviewWordActivity extends BaseActivity {
 
     /**
      * Extras key for file to review.
@@ -45,6 +38,9 @@ public class ReviewWordActivity extends Activity {
     ArrayList<Pronunciation> pronunciations = new ArrayList<Pronunciation>();
     String meaning;
 
+    private int currentChar = 0;
+    private int currentStroke = 0;
+
     private ReviewAdapter reviewAdapter = null;
     private GridView gridView = null;
 
@@ -52,6 +48,7 @@ public class ReviewWordActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review_word);
+        super.onCreateDrawer();
 
         scale = getResources().getDisplayMetrics().density;
 
@@ -97,18 +94,19 @@ public class ReviewWordActivity extends Activity {
     }
 
     private void rewind(){
+        reviewAdapter.getHolders().get(0).reviewCharView.clear();
     }
 
     private void previous(){
-        ((ReviewCharView)gridView.getChildAt(0).findViewById(R.id.review_char_view)).removeStroke();
+        reviewAdapter.getHolders().get(0).reviewCharView.removeStroke();
     }
 
     private void next(){
-        ((ReviewCharView)gridView.getChildAt(0).findViewById(R.id.review_char_view)).addStroke();
+        reviewAdapter.getHolders().get(0).reviewCharView.addStroke();
     }
 
     private void fastForward(){
-
+        reviewAdapter.getHolders().get(0).reviewCharView.drawChar();
     }
 
     protected void loadFromFile(){

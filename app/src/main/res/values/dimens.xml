@@ -16,4 +16,5 @@
     <dimen name="button_font_size">20sp</dimen>
     <dimen name="review_char_width">120dp</dimen>
     <dimen name="view_word_padding">5dp</dimen>
+    <dimen name="drawer_padding">16dp</dimen>
 </resources>

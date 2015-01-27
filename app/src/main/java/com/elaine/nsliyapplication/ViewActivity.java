@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * Displays thumbnails of all characters on file.
  * Created by Elaine on 12/27/2014.
  */
-public class ViewActivity extends Activity {
+public class ViewActivity extends BaseActivity {
 
     /**
      * Size (in dp) of image thumbnails (square)
@@ -60,6 +60,7 @@ public class ViewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
+        super.onCreateDrawer();
 
         // Recover memory cache if previous instance existed
         RetainViewFragment retainViewFragment = RetainViewFragment

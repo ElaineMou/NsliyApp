@@ -19,10 +19,14 @@ import com.elaine.nsliyapplication.DrawActivity;
 import com.elaine.nsliyapplication.EditDrawActivity;
 import com.elaine.nsliyapplication.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -56,14 +60,6 @@ public class DrawView extends View {
      * Type of image file for strokes.
      */
     public static final String IMAGE_TYPE = ".png";
-    /**
-     * Separator between x and y coordinates of a pair of offsets coordinates.
-     */
-    public static final String XY_SEPARATOR = ",";
-    /**
-     * Separator between multiple pairs of offsets coordinates.
-     */
-    public static final String OFFSETS_SEPARATOR = ";";
     /**
      * Minimum width for ink strokes.
      */
@@ -174,8 +170,12 @@ public class DrawView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh){
         if(!haveLoadedFromDirectory && getContext() instanceof EditDrawActivity){
-            loadFromDirectory(((EditDrawActivity) getContext()).getDirectory());
-            haveLoadedFromDirectory = true;
+            try {
+                loadFromDirectory(((EditDrawActivity) getContext()).getDirectory());
+                haveLoadedFromDirectory = true;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -538,7 +538,7 @@ public class DrawView extends View {
      * Saves current character and strokes to file.
      * @param context - Activity passed in to get directory
      */
-    public File saveCharacter(Context context, File directory){
+    public File saveCharacter(Context context, File directory) throws JSONException, IOException {
         boolean success = false;
         boolean editing = (directory != null);
         int newCharNum=0;
@@ -609,32 +609,30 @@ public class DrawView extends View {
                             e.printStackTrace();
                             success = false;
                         }
-                        // Build text line of coordinates from character's top left corner
-                        StringBuilder strBuilder = new StringBuilder();
-                        size = offsetsFromCorner.size();
-                        for (int i = 0; i < size; i++) {
-                            Point coordinates = offsetsFromCorner.get(i);
-                            strBuilder.append((int) (coordinates.getX() - characterBounds.left))
-                                    .append(XY_SEPARATOR)
-                                    .append((int) (coordinates.getY() - characterBounds.top))
-                                    .append(OFFSETS_SEPARATOR);
+
+                        JSONArray jsonOffsets = new JSONArray();
+                        for (Point coordinates : offsetsFromCorner) {
+                            JSONArray jsonOffset = new JSONArray();
+                            jsonOffset.put(0,(int)(coordinates.getX() - characterBounds.left));
+                            jsonOffset.put(1,(int)(coordinates.getY() - characterBounds.top));
+                            jsonOffsets.put(jsonOffset);
                         }
+
 
                         // Create new text file
                         File textFile = new File(directory, OFFSET_FILE_NAME);
                         if (textFile.exists()) {
                             textFile.delete();
                         }
-                        FileOutputStream outputStream;
+                        FileWriter fileWriter = new FileWriter(textFile);
                         try {
-                            outputStream = new FileOutputStream(textFile);
-                            outputStream.write(strBuilder.toString().getBytes());
-                            outputStream.close();
-                        } catch (Exception e) {
+                            fileWriter.write(jsonOffsets.toString());
+                        } catch (IOException e) {
                             e.printStackTrace();
-                            success = false;
+                        } finally {
+                            fileWriter.flush();
+                            fileWriter.close();
                         }
-
                     }
                 }
             }
@@ -688,7 +686,7 @@ public class DrawView extends View {
         setMeasuredDimension(width,height);
     }
 
-    public void loadFromDirectory(File directory){
+    public void loadFromDirectory(File directory) throws JSONException {
         clear();
         if(displayBitmap == null) {
             // Create displayBitmap with transparency, new canvas to draw onto displayBitmap with.
@@ -786,14 +784,16 @@ public class DrawView extends View {
                 characterBounds = new RectF(spaceFromLeft,spaceFromTop,
                         spaceFromLeft + width, spaceFromTop + height);
 
-                String[] pairs = stringBuilder.toString().split(OFFSETS_SEPARATOR);
-                for(int i=0;i<pairs.length;i++){
+                JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                int length = jsonArray.length();
+
+                for(int i=0;i<length;i++){
                     File strokeFile = new File(directory,STROKE_PREFIX + i + IMAGE_TYPE);
                     // For each stroke in file
                     if(strokeFile.exists()) {
-                        String[] xy = pairs[i].split(XY_SEPARATOR);
-                        int x = Integer.parseInt(xy[0]);
-                        int y = Integer.parseInt(xy[1]);
+                        JSONArray coordinates = jsonArray.getJSONArray(i);
+                        int x = coordinates.getInt(0);
+                        int y = coordinates.getInt(1);
                         // Add to offsets
                         offsetsFromCorner.add(new Point(x*scaleX + spaceFromLeft,y*scaleY + spaceFromTop));
 

@@ -1,6 +1,5 @@
 package com.elaine.nsliyapplication;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -24,7 +23,7 @@ import java.io.File;
  * Displays words that have been created by the user.
  * Created by Elaine on 1/11/2015.
  */
-public class ViewWordActivity extends Activity {
+public class ViewWordActivity extends BaseActivity {
 
     /**
      * Memory cache to be used by this activity
@@ -51,6 +50,7 @@ public class ViewWordActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_words);
+        super.onCreateDrawer();
         charsDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         // Recover memory cache if previous instance existed

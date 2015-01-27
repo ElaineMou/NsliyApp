@@ -1,10 +1,13 @@
 package com.elaine.nsliyapplication.words;
 
 import android.content.Context;
+import android.os.Build;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,22 +16,23 @@ import com.elaine.nsliyapplication.R;
 import com.elaine.nsliyapplication.input.Pronunciation;
 import com.elaine.nsliyapplication.input.SyllableSoundTask;
 
-import org.w3c.dom.Text;
+import org.json.JSONException;
 
 import java.io.File;
 import java.util.ArrayList;
 
 /**
+ * Adapter supplies ReviewCharViews to GridView
  * Created by Elaine on 1/15/2015.
  */
 public class ReviewAdapter extends BaseAdapter {
 
-    Context context;
-    LayoutInflater inflater;
-    ArrayList<File> charFolders;
-    ArrayList<Pronunciation> pronunciations;
-    ArrayList<ViewHolder> holders;
-    float scale;
+    private Context context;
+    private LayoutInflater inflater;
+    private ArrayList<File> charFolders;
+    private ArrayList<Pronunciation> pronunciations;
+    private ArrayList<ViewHolder> holders;
+    private float scale;
 
     public ReviewAdapter(Context context, ArrayList<File> charFolders, ArrayList<Pronunciation> pronunciations){
         this.context = context;
@@ -61,18 +65,21 @@ public class ReviewAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        View view;
-        ViewHolder holder = holders.get(position);;
+        final View view;
+        ViewHolder holder = new ViewHolder();
 
         if(convertView==null) {
+            Log.v("ReviewAdapter","Get view #" + position + ", convertView is null");
             view = inflater.inflate(R.layout.view_review_word, parent, false);
 
             holder.reviewCharView = (ReviewCharView) view.findViewById(R.id.review_char_view);
+            holder.reviewCharView.setLayoutParams(new LinearLayout.LayoutParams(
+                    (int) (scale * ReviewCharView.viewSize), (int) (scale * ReviewCharView.viewSize)));
             holder.reviewCharView.init(charFolders.get(position));
 
             holder.textView = (TextView) view.findViewById(R.id.pronunciation_text_view);
             holder.textView.setGravity(Gravity.CENTER);
-            holder.textView.setText(pronunciations.get(position).syllable + " " + pronunciations.get(position).tone);
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -84,13 +91,34 @@ public class ReviewAdapter extends BaseAdapter {
                 }
             });
 
-            holder.reviewCharView.setLayoutParams(new LinearLayout.LayoutParams((int) (scale * 150), (int) (scale * 150)));
-
             view.setTag(holder);
         } else {
-            return convertView;
+            Log.v("ReviewAdapter","Get view #" + position + ", convertView used");
+            view = convertView;
+            holder = (ViewHolder) view.getTag();
         }
 
+        final ViewHolder holderToAdd = holder;
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if(Build.VERSION.SDK_INT < 16){
+                    view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                } else {
+                    view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+
+                holderToAdd.reviewCharView.makeCanvas();
+                try {
+                    holderToAdd.reviewCharView.loadValuesFromFile();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                holders.add(position, holderToAdd);
+            }
+        });
+
+        holder.textView.setText(pronunciations.get(position).syllable + " " + pronunciations.get(position).tone);
         return view;
     }
 
