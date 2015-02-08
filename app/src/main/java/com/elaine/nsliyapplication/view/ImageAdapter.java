@@ -11,7 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.elaine.nsliyapplication.R;
-import com.elaine.nsliyapplication.ViewActivity;
+import com.elaine.nsliyapplication.ViewCharActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class ImageAdapter extends BaseAdapter {
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             imageFrame = new FrameLayout(context);
-            int frameSize = (int) (ViewActivity.VIEW_IMAGE_SIZE*scale);
+            int frameSize = (int) (ViewCharActivity.VIEW_IMAGE_SIZE*scale);
             imageFrame.setLayoutParams(new GridView.LayoutParams(frameSize,frameSize));
             imageFrame.setForegroundGravity(Gravity.CENTER);
             imageFrame.setBackgroundColor(backgroundColorId);
@@ -88,8 +88,8 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             if(BitmapWorkerTask.cancelPotentialWork(file, imageView)) {
                 final BitmapWorkerTask task = new BitmapWorkerTask(imageView,
-                        (int) (scale * ViewActivity.VIEW_IMAGE_SIZE),
-                        (int) (scale * ViewActivity.VIEW_IMAGE_SIZE), memoryCache, diskCache);
+                        (int) (scale * ViewCharActivity.VIEW_IMAGE_SIZE),
+                        (int) (scale * ViewCharActivity.VIEW_IMAGE_SIZE), memoryCache, diskCache);
                 final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(),
                         placeHolderBitmap, task);
                 imageView.setImageDrawable(asyncDrawable);

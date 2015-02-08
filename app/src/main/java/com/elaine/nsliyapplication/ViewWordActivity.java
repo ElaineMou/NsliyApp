@@ -23,7 +23,7 @@ import java.io.File;
  * Displays words that have been created by the user.
  * Created by Elaine on 1/11/2015.
  */
-public class ViewWordActivity extends BaseActivity {
+public class ViewWordActivity extends DrawerActivity {
 
     /**
      * Memory cache to be used by this activity
@@ -90,6 +90,7 @@ public class ViewWordActivity extends BaseActivity {
                 listView.setAdapter(wordAdapter);
             }
         }
+        drawerLayout.closeDrawer(drawerList);
     }
 
     /**

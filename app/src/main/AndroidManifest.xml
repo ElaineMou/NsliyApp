@@ -11,8 +11,8 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".ViewActivity"
-            android:label="@string/app_name"
+            android:name=".ViewCharActivity"
+            android:label="@string/title_activity_view_chars"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

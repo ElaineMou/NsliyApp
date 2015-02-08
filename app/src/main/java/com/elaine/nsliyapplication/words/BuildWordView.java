@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.elaine.nsliyapplication.R;
-import com.elaine.nsliyapplication.ViewActivity;
+import com.elaine.nsliyapplication.ViewCharActivity;
 
 /**
  * A view that displays the word as it is constructed by the user.
@@ -47,7 +47,7 @@ public class BuildWordView extends FrameLayout {
     public void addThumbnail(Drawable drawable){
         Context context = getContext();
         FrameLayout imageFrame = new FrameLayout(context);
-        int frameSize = (int) (ViewActivity.VIEW_IMAGE_SIZE*scale);
+        int frameSize = (int) (ViewCharActivity.VIEW_IMAGE_SIZE*scale);
         imageFrame.setLayoutParams(new GridView.LayoutParams(frameSize, frameSize));
         imageFrame.setForegroundGravity(Gravity.CENTER);
         imageFrame.setBackgroundColor(Color.LTGRAY);

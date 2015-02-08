@@ -1,6 +1,5 @@
 package com.elaine.nsliyapplication;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
  * Displays thumbnails of all characters on file.
  * Created by Elaine on 12/27/2014.
  */
-public class ViewActivity extends BaseActivity {
+public class ViewCharActivity extends DrawerActivity {
 
     /**
      * Size (in dp) of image thumbnails (square)
@@ -138,7 +137,7 @@ public class ViewActivity extends BaseActivity {
                     @Override
                     public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position,
                                                    long id) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ViewActivity.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ViewCharActivity.this);
                         builder.setTitle(R.string.delete_character_dialog);
 
                         SharedPreferences sharedPreferences = getSharedPreferences(
@@ -157,7 +156,7 @@ public class ViewActivity extends BaseActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 if (((ImageAdapter) parent.getAdapter()).remove(position)) {
                                     // Notify user through short Toast
-                                    Toast.makeText(ViewActivity.this, R.string.deleted_toast,
+                                    Toast.makeText(ViewCharActivity.this, R.string.deleted_toast,
                                             Toast.LENGTH_SHORT).show();
                                     // Display empty message when all files are gone
                                     if (((ImageAdapter) parent.getAdapter()).filesEmpty()) {
@@ -181,7 +180,7 @@ public class ViewActivity extends BaseActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         // Open editing activity on the relevant file
-                        Intent intent = new Intent(ViewActivity.this,EditDrawActivity.class);
+                        Intent intent = new Intent(ViewCharActivity.this,EditDrawActivity.class);
                         intent.putExtra(EditDrawActivity.FILE_EXTRA_NAME, ((ImageAdapter) parent.
                                 getAdapter()).getFiles().get(position).getParentFile().getAbsolutePath());
                         startActivityForResult(intent, EDIT_CHAR_REQUEST);
@@ -189,6 +188,7 @@ public class ViewActivity extends BaseActivity {
                 });
             }
         }
+        drawerLayout.closeDrawer(drawerList);
     }
 
     @Override

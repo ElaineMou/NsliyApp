@@ -4,7 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 
-import com.elaine.nsliyapplication.ViewActivity;
+import com.elaine.nsliyapplication.ViewCharActivity;
 
 /**
  * Fragment that retains memory cache during configuration changes, activity stops, etc.
@@ -46,9 +46,9 @@ public class RetainViewFragment extends Fragment {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        if(getActivity() instanceof ViewActivity){
+        if(getActivity() instanceof ViewCharActivity){
             // Clear disk cache when this fragment is ultimately destroyed.
-            DiskLruImageCache diskCache = ((ViewActivity) getActivity()).getDiskCache();
+            DiskLruImageCache diskCache = ((ViewCharActivity) getActivity()).getDiskCache();
             if(diskCache!=null){
                 diskCache.clearCache();
             }

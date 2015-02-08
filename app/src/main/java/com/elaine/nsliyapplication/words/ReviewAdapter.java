@@ -115,6 +115,7 @@ public class ReviewAdapter extends BaseAdapter {
                     e.printStackTrace();
                 }
                 holders.add(position, holderToAdd);
+                Log.v("ReviewAdapter","Added holder to holders at " + position);
             }
         });
 

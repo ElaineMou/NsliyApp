@@ -1,5 +1,6 @@
 package com.elaine.nsliyapplication;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,7 +18,7 @@ import java.io.IOException;
  * Used to edit previously written characters.
  * Created by Elaine on 1/4/2015.
  */
-public class EditDrawActivity extends BaseActivity {
+public class EditDrawActivity extends Activity {
 
     public static final String FILE_EXTRA_NAME = "fileName";
     public static final String DIRECTORY_RETURN_EXTRA = "directory";
@@ -28,7 +29,6 @@ public class EditDrawActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         directory = new File(getIntent().getStringExtra(FILE_EXTRA_NAME));
         setContentView(R.layout.activity_draw);
-        super.onCreateDrawer();
         setResult(RESULT_CANCELED);
     }
 

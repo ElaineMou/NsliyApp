@@ -1,5 +1,6 @@
 package com.elaine.nsliyapplication;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,7 +13,7 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.IOException;
 
-public class DrawActivity extends BaseActivity {
+public class DrawActivity extends Activity {
 
     public static final String PREFERENCES_FILE_KEY = "preferencesKey";
 
@@ -20,7 +21,6 @@ public class DrawActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
-        super.onCreateDrawer();
     }
 
     @Override

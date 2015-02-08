@@ -1,5 +1,6 @@
 package com.elaine.nsliyapplication;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,7 +48,7 @@ import java.util.Random;
  * Allows user to create words by tapping on existing characters.
  * Created by Elaine on 1/8/2015.
  */
-public class CreateWordActivity extends BaseActivity {
+public class CreateWordActivity extends Activity {
 
     /**
      * String to be shown when a word has no known pronunciations.
@@ -89,7 +90,6 @@ public class CreateWordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
-        super.onCreateDrawer();
 
         // Recover memory cache if previous instance existed
         RetainViewFragment retainViewFragment = RetainViewFragment
@@ -326,7 +326,7 @@ public class CreateWordActivity extends BaseActivity {
         Resources resources = getResources();
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                (int)(ViewActivity.VIEW_IMAGE_SIZE*scale - 10), LinearLayout.LayoutParams.WRAP_CONTENT);
+                (int)(ViewCharActivity.VIEW_IMAGE_SIZE*scale - 10), LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(5, 5, 5, 5);
         textView.setLayoutParams(params);
         textView.setBackgroundColor(resources.getColor(R.color.pale_green));

@@ -1,7 +1,13 @@
 package com.elaine.nsliyapplication;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.LightingColorFilter;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
@@ -10,6 +16,7 @@ import android.widget.TextView;
 import com.elaine.nsliyapplication.input.Pronunciation;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
 import com.elaine.nsliyapplication.words.ReviewAdapter;
+import com.elaine.nsliyapplication.words.ReviewCharView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,13 +32,12 @@ import java.util.ArrayList;
  * Activity allows review of words by step-by-step process.
  * Created by Elaine on 1/14/2015.
  */
-public class ReviewWordActivity extends BaseActivity {
+public class ReviewWordActivity extends Activity {
 
     /**
      * Extras key for file to review.
      */
     public static final String EXTRAS_KEY_WORD_FILE = "wordFile";
-    private float scale;
 
     private File wordFile = null;
     ArrayList<File> characterFolders = new ArrayList<File>();
@@ -39,7 +45,6 @@ public class ReviewWordActivity extends BaseActivity {
     String meaning;
 
     private int currentChar = 0;
-    private int currentStroke = 0;
 
     private ReviewAdapter reviewAdapter = null;
     private GridView gridView = null;
@@ -48,41 +53,138 @@ public class ReviewWordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review_word);
-        super.onCreateDrawer();
-
-        scale = getResources().getDisplayMetrics().density;
 
         wordFile = (File) getIntent().getSerializableExtra(EXTRAS_KEY_WORD_FILE);
         loadFromFile();
 
         Button button = (Button) findViewById(R.id.back_back);
-        button.setOnClickListener(new View.OnClickListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                rewind();
+            public boolean onTouch(View v, MotionEvent event) {
+                Drawable drawable = v.getBackground();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        drawable.setColorFilter(new LightingColorFilter(Color.LTGRAY, 1));
+                        drawable.invalidateSelf();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Rect r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (!r.contains((int) event.getX(), (int) event.getY())) {
+                            drawable.clearColorFilter();
+                            drawable.invalidateSelf();
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        drawable.clearColorFilter();
+                        drawable.invalidateSelf();
+                        r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (r.contains((int) event.getX(), (int) event.getY())) {
+                            rewind();
+                        }
+                        break;
+                }
+                return true;
             }
         });
+
         button = (Button) findViewById(R.id.back);
-        button.setOnClickListener(new View.OnClickListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                previous();
+            public boolean onTouch(View v, MotionEvent event) {
+                Drawable drawable = v.getBackground();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        drawable.setColorFilter(new LightingColorFilter(Color.LTGRAY, 1));
+                        drawable.invalidateSelf();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Rect r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (!r.contains((int) event.getX(), (int) event.getY())) {
+                            drawable.clearColorFilter();
+                            drawable.invalidateSelf();
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        drawable.clearColorFilter();
+                        drawable.invalidateSelf();
+                        r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (r.contains((int) event.getX(), (int) event.getY())) {
+                            previous();
+                        }
+                        break;
+                }
+                return true;
             }
         });
+
         button = (Button) findViewById(R.id.forward);
-        button.setOnClickListener(new View.OnClickListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                next();
+            public boolean onTouch(View v, MotionEvent event) {
+                Drawable drawable = v.getBackground();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        drawable.setColorFilter(new LightingColorFilter(Color.LTGRAY, 1));
+                        drawable.invalidateSelf();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Rect r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (!r.contains((int) event.getX(), (int) event.getY())) {
+                            drawable.clearColorFilter();
+                            drawable.invalidateSelf();
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        drawable.clearColorFilter();
+                        drawable.invalidateSelf();
+                        r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (r.contains((int) event.getX(), (int) event.getY())) {
+                            next();
+                        }
+                        break;
+                }
+                return true;
             }
         });
+
         button = (Button) findViewById(R.id.forward_forward);
-        button.setOnClickListener(new View.OnClickListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                fastForward();
+            public boolean onTouch(View v, MotionEvent event) {
+                Drawable drawable = v.getBackground();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        drawable.setColorFilter(new LightingColorFilter(Color.LTGRAY, 1));
+                        drawable.invalidateSelf();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Rect r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (!r.contains((int) event.getX(), (int) event.getY())) {
+                            drawable.clearColorFilter();
+                            drawable.invalidateSelf();
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        drawable.clearColorFilter();
+                        drawable.invalidateSelf();
+                        r = new Rect();
+                        v.getLocalVisibleRect(r);
+                        if (r.contains((int) event.getX(), (int) event.getY())) {
+                            fastForward();
+                        }
+                        break;
+                }
+                return true;
             }
         });
+
     }
 
     @Override
@@ -94,19 +196,39 @@ public class ReviewWordActivity extends BaseActivity {
     }
 
     private void rewind(){
-        reviewAdapter.getHolders().get(0).reviewCharView.clear();
+        boolean cleared = getReviewer(currentChar).clear();
+        if(!cleared && currentChar > 0){
+            currentChar--;
+            getReviewer(currentChar).clear();
+        }
     }
 
     private void previous(){
-        reviewAdapter.getHolders().get(0).reviewCharView.removeStroke();
+        boolean removed = getReviewer(currentChar).removeStroke();
+        if(!removed && currentChar > 0){
+            currentChar--;
+            getReviewer(currentChar).removeStroke();
+        }
     }
 
     private void next(){
-        reviewAdapter.getHolders().get(0).reviewCharView.addStroke();
+        boolean added = getReviewer(currentChar).addStroke();
+        if(!added && currentChar < reviewAdapter.getHolders().size() - 1){
+            currentChar++;
+            getReviewer(currentChar).addStroke();
+        }
     }
 
     private void fastForward(){
-        reviewAdapter.getHolders().get(0).reviewCharView.drawChar();
+        boolean filled = getReviewer(currentChar).drawChar();
+        if(!filled && currentChar < reviewAdapter.getHolders().size() - 1){
+            currentChar++;
+            getReviewer(currentChar).drawChar();
+        }
+    }
+
+    private ReviewCharView getReviewer(int position){
+        return reviewAdapter.getHolders().get(position).reviewCharView;
     }
 
     protected void loadFromFile(){

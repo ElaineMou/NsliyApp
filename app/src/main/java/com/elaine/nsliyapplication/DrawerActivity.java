@@ -17,13 +17,15 @@ import android.widget.ListView;
  * Allows multiple activities using the same navigation drawer.
  * Derived from kevinvanmierlo on github.com.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class DrawerActivity extends Activity {
 
     private static final String[] drawerNames = {"Manage Characters","Manage Words"};
 
     public DrawerLayout drawerLayout;
     public ListView drawerList;
     private ActionBarDrawerToggle drawerToggle;
+
+    public boolean isDrawerOpen = false;
 
     protected void onCreateDrawer(){
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -32,13 +34,26 @@ public abstract class BaseActivity extends Activity {
             @Override
             public void onDrawerClosed(View view){
                 super.onDrawerClosed(view);
+                getActionBar().setTitle(DrawerActivity.this.getTitle());
                 invalidateOptionsMenu();
             }
 
             @Override
             public void onDrawerOpened(View drawerView){
                 super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(R.string.app_name);
                 invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                if(slideOffset > .55 && !isDrawerOpen){
+                    onDrawerOpened(drawerView);
+                    isDrawerOpen = true;
+                } else if(slideOffset < .45 && isDrawerOpen) {
+                    onDrawerClosed(drawerView);
+                    isDrawerOpen = false;
+                }
             }
         };
         drawerLayout.setDrawerListener(drawerToggle);
@@ -58,21 +73,27 @@ public abstract class BaseActivity extends Activity {
                 Intent intent = null;
                 switch(position){
                     case 0:
-                        intent = new Intent(BaseActivity.this,ViewActivity.class);
+                        if(!(DrawerActivity.this instanceof ViewCharActivity)){
+                            intent = new Intent(DrawerActivity.this, ViewCharActivity.class);
+                        }
                         break;
                     case 1:
-                        intent = new Intent(BaseActivity.this,ViewWordActivity.class);
+                        if(!(DrawerActivity.this instanceof ViewWordActivity)) {
+                            intent = new Intent(DrawerActivity.this, ViewWordActivity.class);
+                        }
                         break;
                 }
                 if(intent != null){
                     drawerLayout.closeDrawer(drawerList);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivity(intent);
-                    if(getParent()!=null){
-                        finish();
-                    }
+                    finish();
+                    overridePendingTransition(0,0);
                 }
             }
         });
+
+        drawerLayout.openDrawer(drawerList);
     }
 
     @Override
