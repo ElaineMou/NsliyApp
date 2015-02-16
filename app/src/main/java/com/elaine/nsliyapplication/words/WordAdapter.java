@@ -112,25 +112,24 @@ public class WordAdapter extends BaseAdapter {
             holder.reviewButton = (Button) view.findViewById(R.id.review_word_button);
             holder.deleteButton = (Button) view.findViewById(R.id.delete_word_button);
 
-            holder.deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    deleteWord(position);
-                }
-            });
-
-            holder.reviewButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    reviewWord(position);
-                }
-            });
-
             view.setTag(holder);
         } else {
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
+
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteWord(position);
+            }
+        });
+        holder.reviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reviewWord(position);
+            }
+        });
 
         holder.pronunciations.removeAllViews();
         holder.thumbnails.removeAllViews();
@@ -205,8 +204,7 @@ public class WordAdapter extends BaseAdapter {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 for (String string : stringHashSet) {
                     int currentValue = sharedPreferences.getInt(string, 1);
-                    editor.putInt(string, currentValue - 1);
-                    Log.v("WordAdapter","Put: " + string + "," + (currentValue-1));
+                    editor.putInt(string, currentValue - 1);;
                 }
                 editor.commit();
             }

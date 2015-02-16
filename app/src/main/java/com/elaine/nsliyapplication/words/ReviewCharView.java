@@ -39,7 +39,7 @@ public class ReviewCharView extends View {
      */
     public File charFile=null;
     public static FilenameFilter filenameFilter;
-    private List<File> strokeFileList;
+    private ArrayList<File> strokeFileList;
 
     private ArrayList<Bitmap> strokes = new ArrayList<Bitmap>();
     private ArrayList<Point> offsetsFromDisplay = new ArrayList<Point>();
@@ -83,7 +83,16 @@ public class ReviewCharView extends View {
         }
 
         if(charFile!=null) {
-            strokeFileList = Arrays.asList(charFile.listFiles(filenameFilter));
+            strokeFileList = new ArrayList<File>();
+            String[] strokeFileNames = charFile.list(filenameFilter);
+            int size = strokeFileNames.length;
+            for(int i=0;i<size;i++){
+                String name = DrawView.STROKE_PREFIX + i + ".png";
+                File strokeFile = new File(charFile,name);
+                if(strokeFile.exists()){
+                    strokeFileList.add(strokeFile);
+                }
+            }
         }
         setBackgroundColor(getResources().getColor(R.color.cream));
     }
@@ -100,6 +109,7 @@ public class ReviewCharView extends View {
 
     public void loadValuesFromFile() throws JSONException {
         strokes.clear();
+        offsetsFromDisplay.clear();
         strokesWritten = 0;
         if(charFile!=null && charFile.isDirectory()) {
             File imageFile = new File(charFile, DrawView.DISPLAY_IMAGE_NAME);
@@ -192,7 +202,7 @@ public class ReviewCharView extends View {
                                 int x = coordinates.getInt(0);
                                 int y = coordinates.getInt(1);
                                 // Add to offsets
-                                offsetsFromDisplay.add(new Point(x * scaleX, y * scaleY));
+                                offsetsFromDisplay.add(new Point(x * (scaleX/inSampleSize), y * (scaleY/inSampleSize)));
 
                                 // Use previous sample size to create stroke sampled images
                                 Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath(), options);

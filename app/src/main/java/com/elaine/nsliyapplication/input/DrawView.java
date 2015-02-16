@@ -795,7 +795,7 @@ public class DrawView extends View {
                         int x = coordinates.getInt(0);
                         int y = coordinates.getInt(1);
                         // Add to offsets
-                        offsetsFromCorner.add(new Point(x*scaleX + spaceFromLeft,y*scaleY + spaceFromTop));
+                        offsetsFromCorner.add(new Point(x*(scaleX/inSampleSize) + spaceFromLeft,y*(scaleY/inSampleSize) + spaceFromTop));
 
                         // Use previous sample size to create stroke sampled images
                         Bitmap bitmap = BitmapFactory.decodeFile(strokeFile.getAbsolutePath(),options);
