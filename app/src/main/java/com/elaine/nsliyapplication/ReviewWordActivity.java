@@ -292,7 +292,7 @@ public class ReviewWordActivity extends Activity {
                 if(jsonPronunciations !=null){
                     int length = jsonPronunciations.length();
                     for(int i=0;i<length;i++) {
-                        String pronunciation = null;
+                        String pronunciation = "";
                         try {
                             pronunciation = jsonPronunciations.getString(i);
                         } catch (JSONException e) {

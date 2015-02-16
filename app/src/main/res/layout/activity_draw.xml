@@ -1,36 +1,20 @@
-<android.support.v4.widget.DrawerLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/pale_green">
-    <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
+
+    <com.elaine.nsliyapplication.input.DrawView
+        android:id="@+id/draw_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context="com.elaine.nsliyapplication.input.DrawFragment">
+        android:layout_height="0dp"
+        android:layout_weight="3"/>
 
-        <com.elaine.nsliyapplication.input.DrawView
-            android:id="@+id/draw_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"/>
+    <com.elaine.nsliyapplication.input.SyllableEntryView
+        android:id="@+id/pronunciation_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"/>
 
-        <com.elaine.nsliyapplication.input.SyllableEntryView
-            android:id="@+id/pronunciation_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"/>
-
-    </LinearLayout>
-    <ListView
-        android:id="@id/drawer_list"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:divider="@color/dark_green"
-        android:dividerHeight="1dp"
-        android:background="@color/pale_green"/>
-</android.support.v4.widget.DrawerLayout>
+</LinearLayout>
