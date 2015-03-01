@@ -2,14 +2,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/pale_green">
+    android:orientation="vertical">
 
     <com.elaine.nsliyapplication.input.DrawView
         android:id="@+id/draw_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/g900"/>
 
     <com.elaine.nsliyapplication.input.SyllableEntryView
         android:id="@+id/pronunciation_view"

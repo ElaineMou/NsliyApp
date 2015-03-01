@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,16 +50,46 @@ import java.util.HashSet;
  */
 public class WordAdapter extends BaseAdapter {
 
+    /**
+     * Context for this adapter.
+     */
     Context context;
+    /**
+     * Inflater to load views.
+     */
     LayoutInflater inflater;
+    /**
+     * List of files to source word info from.
+     */
     ArrayList<File> wordFiles;
 
+    /**
+     * Density scale for loading images.
+     */
     private final float scale;
+    /**
+     * Image size for all character thumbnails (in dp).
+     */
     public static final int ITEM_WIDTH = 60;
+    /**
+     * Place holder bitmap for when image is loaded.
+     */
     public static Bitmap placeHolderBitmap;
+    /**
+     * Scaled width for all items in normal pixels.
+     */
     private final int scaledItemWidth;
+    /**
+     * Disk cache for storing thumbnail character images.
+     */
     private DiskLruImageCache diskCache;
+    /**
+     * In-memory cache for storing thumbnail character images.
+     */
     private BitmapLruCache memoryCache;
+    /**
+     * Color value for the image background.
+     */
     private int bgImageColorId;
 
     public WordAdapter(Context context, File[] wordFiles, BitmapLruCache lruCache,
@@ -80,7 +109,7 @@ public class WordAdapter extends BaseAdapter {
         this.memoryCache = lruCache;
         this.diskCache = diskLruImageCache;
 
-        bgImageColorId = context.getResources().getColor(R.color.cream);
+        bgImageColorId = context.getResources().getColor(R.color.g50);
     }
 
     @Override
@@ -118,6 +147,7 @@ public class WordAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
+        // Set button functions with the proper position index
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,6 +161,7 @@ public class WordAdapter extends BaseAdapter {
             }
         });
 
+        // Clear lists on view
         holder.pronunciations.removeAllViews();
         holder.thumbnails.removeAllViews();
 
@@ -141,6 +172,7 @@ public class WordAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        // Fill image list with frames
         if(imageFiles!=null) {
             for(File imageFile: imageFiles) {
                 FrameLayout imageFrame = new FrameLayout(context);
@@ -155,6 +187,7 @@ public class WordAdapter extends BaseAdapter {
             }
         }
 
+        // Get pronunciations from file
         ArrayList<Pronunciation> pronunciations = null;
         try{
             pronunciations = getPronunciationsFromWordFile(wordFiles.get(position));
@@ -162,6 +195,7 @@ public class WordAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        // Fill TextView list from those pronunciations
         if(pronunciations!=null){
             for(Pronunciation pronunciation: pronunciations){
                 TextView textView = new TextView(context);
@@ -170,8 +204,7 @@ public class WordAdapter extends BaseAdapter {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(scaledItemWidth,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
                 textView.setLayoutParams(params);
-                textView.setBackgroundColor(resources.getColor(R.color.pale_green));
-                textView.setTextColor(resources.getColor(R.color.dark_green));
+                textView.setTextColor(resources.getColor(R.color.g800));
                 textView.setGravity(Gravity.CENTER);
                 textView.setText(pronunciation.syllable + " " + pronunciation.tone);
                 holder.pronunciations.addView(textView);
@@ -181,6 +214,10 @@ public class WordAdapter extends BaseAdapter {
         return view;
     }
 
+    /**
+     * Start a new ReviewWordActivity from the appropriate file
+     * @param position - position of the selected button in the list
+     */
     private void reviewWord(int position) {
         File file = wordFiles.get(position);
         Intent intent = new Intent(context, ReviewWordActivity.class);
@@ -188,6 +225,10 @@ public class WordAdapter extends BaseAdapter {
         context.startActivity(intent);
     }
 
+    /**
+     * Deletes the word at the given position.
+     * @param position - position of the selected button in the list
+     */
     private void deleteWord(int position) {
         HashSet<String> stringHashSet = null;
         try {
@@ -196,19 +237,23 @@ public class WordAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        // If word file in memory is successfully deleted
         if(wordFiles.get(position).delete()){
+            // Display a toast notifying user of deletion
             Toast.makeText(context, R.string.deleted_word_toast,Toast.LENGTH_SHORT).show();
 
+            // Update shared preferences of all characters
             if(stringHashSet!=null) {
                 SharedPreferences sharedPreferences = context.getSharedPreferences(DrawActivity.PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 for (String string : stringHashSet) {
                     int currentValue = sharedPreferences.getInt(string, 1);
-                    editor.putInt(string, currentValue - 1);;
+                    editor.putInt(string, currentValue - 1);
                 }
                 editor.commit();
             }
 
+            // Remove file from adapter list
             wordFiles.remove(position);
             // Display empty message when all files are gone
             if(wordFiles.isEmpty()){
@@ -220,6 +265,11 @@ public class WordAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Load bitmap into ImageView with an AsyncTask
+     * @param file - the file to load an image from
+     * @param imageView - the ImageView to be filled
+     */
     public void loadBitmap(File file, ImageView imageView) {
         final String imageKey = file.getParentFile().getName();
         final Bitmap bitmap = memoryCache.get(imageKey);
@@ -237,6 +287,12 @@ public class WordAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Gets the names of the distinct characters used in the word
+     * @param wordFile - the file that stores the word information
+     * @return - the names of distinct characters
+     * @throws JSONException
+     */
     HashSet<String> getUniqueCharsInWord(File wordFile) throws JSONException{
         HashSet<String> set = new HashSet<String>();
 
@@ -264,6 +320,7 @@ public class WordAdapter extends BaseAdapter {
                 }
             }
 
+            // Retrieve and save all character names in the JSON file
             if (stringBuilder != null) {
                 JSONObject jsonObject = new JSONObject(stringBuilder.toString());
                 JSONArray jsonArray = jsonObject.getJSONArray(CreateWordActivity.JSON_KEY_CHARACTERS);
@@ -277,6 +334,12 @@ public class WordAdapter extends BaseAdapter {
         return set;
     }
 
+    /**
+     * Retrieves the full display character images' files using the word file
+     * @param wordFile - the word file that contains character names
+     * @return - The files of all characters' images
+     * @throws JSONException
+     */
     ArrayList<File> getImageFilesFromWordFile(File wordFile) throws JSONException {
         ArrayList<File> list = new ArrayList<File>();
 
@@ -304,6 +367,7 @@ public class WordAdapter extends BaseAdapter {
                 }
             }
 
+            // Pull file names from JSON array in word file, and save list of Files
             if (stringBuilder != null) {
                 File picturesDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                 JSONObject jsonObject = new JSONObject(stringBuilder.toString());
@@ -321,6 +385,12 @@ public class WordAdapter extends BaseAdapter {
         return list;
     }
 
+    /**
+     * Retrieves Pronunciations from the given word file
+     * @param pronunciationFile - the word file containing pronunciations
+     * @return - the List of pronunciations for the world
+     * @throws JSONException
+     */
     ArrayList<Pronunciation> getPronunciationsFromWordFile(File pronunciationFile) throws JSONException {
         ArrayList<Pronunciation> list = new ArrayList<Pronunciation>();
 
@@ -348,6 +418,7 @@ public class WordAdapter extends BaseAdapter {
                 }
             }
 
+            // Pull pronunciations from the JSON file, and save Pronunciations from the array
             if (stringBuilder != null) {
                 JSONObject jsonObject = new JSONObject(stringBuilder.toString());
                 JSONArray jsonArray = jsonObject.getJSONArray(CreateWordActivity.JSON_KEY_PRONUNCIATIONS);
@@ -370,10 +441,25 @@ public class WordAdapter extends BaseAdapter {
         return list;
     }
 
+    /**
+     * Class used to hold references to the view components for quick access
+     */
     private class ViewHolder{
+        /**
+         * Image thumbnails in the word view
+         */
         public LinearLayout thumbnails;
+        /**
+         * TextView list of pronunciations in the word view
+         */
         public LinearLayout pronunciations;
+        /**
+         * The button pressed to launch a ReviewWordActivity
+         */
         public Button reviewButton;
+        /**
+         * Button pressed to delete the word.
+         */
         public Button deleteButton;
     }
 }

@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="g50">#F1F8E9</color>
+    <color name="g100">#DCEDC8</color>
+    <color name="g200">#C5E1A5</color>
+    <color name="g300">#AED581</color>
+    <color name="g400">#9CCC65</color>
+    <color name="g500">#8BC34A</color>
+    <color name="g600">#7CB342</color>
+    <color name="g700">#689F38</color>
+    <color name="g800">#558B2F</color>
+    <color name="g900">#33691E</color>
 
-    <color name="menu_green">#8bcb81</color>
-    <color name="pale_green">#c6f4be</color>
-    <color name="dark_green">#39845e</color>
-    <color name="cream">#F5F5DC</color>
-    <color name="light_gray">#D4D4D4</color>
-    <color name="medium_gray">#B5B5B5</color>
-    <color name="dark_gray_text">#4A4A4A</color>
+    <color name="A100">#A7FFEB</color>
+    <color name="A200">#64FFDA</color>
+    <color name="A400">#1DE9B6</color>
+    <color name="A700">#00BFA5</color>
 </resources>

@@ -2,8 +2,6 @@ package com.elaine.nsliyapplication.words;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,11 +25,29 @@ import java.util.ArrayList;
  */
 public class ReviewAdapter extends BaseAdapter {
 
+    /**
+     * Context of the adapter.
+     */
     private Context context;
+    /**
+     * Inflater used to load views.
+     */
     private LayoutInflater inflater;
+    /**
+     * Character folders used to supply images to the adapter.
+     */
     private ArrayList<File> charFolders;
+    /**
+     * Pronunciations for the adapter.
+     */
     private ArrayList<Pronunciation> pronunciations;
+    /**
+     * ViewHolder list used for quick access instead of findViewById
+     */
     private ArrayList<ViewHolder> holders;
+    /**
+     * Density scale for loading images.
+     */
     private float scale;
 
     public ReviewAdapter(Context context, ArrayList<File> charFolders, ArrayList<Pronunciation> pronunciations){
@@ -41,6 +57,7 @@ public class ReviewAdapter extends BaseAdapter {
         this.pronunciations = pronunciations;
         this.holders = new ArrayList<ViewHolder>();
         int size = charFolders.size();
+        // Add empty ViewHolders to list length
         for(int i=0;i<size;i++){
             holders.add(new ViewHolder());
         }
@@ -69,7 +86,6 @@ public class ReviewAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
 
         if(convertView==null) {
-            Log.v("ReviewAdapter","Get view #" + position + ", convertView is null");
             view = inflater.inflate(R.layout.view_review_word, parent, false);
 
             holder.reviewCharView = (ReviewCharView) view.findViewById(R.id.review_char_view);
@@ -78,7 +94,6 @@ public class ReviewAdapter extends BaseAdapter {
             holder.reviewCharView.init(charFolders.get(position));
 
             holder.textView = (TextView) view.findViewById(R.id.pronunciation_text_view);
-            holder.textView.setGravity(Gravity.CENTER);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -93,11 +108,11 @@ public class ReviewAdapter extends BaseAdapter {
 
             view.setTag(holder);
         } else {
-            Log.v("ReviewAdapter","Get view #" + position + ", convertView used");
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
 
+        // Set view to save itself to the indexed ViewHolder upon being set on display.
         final ViewHolder holderToAdd = holder;
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -115,7 +130,6 @@ public class ReviewAdapter extends BaseAdapter {
                     e.printStackTrace();
                 }
                 holders.set(position, holderToAdd);
-                Log.v("ReviewAdapter","Added holder to holders at " + position);
             }
         });
 
@@ -123,12 +137,24 @@ public class ReviewAdapter extends BaseAdapter {
         return view;
     }
 
+    /**
+     * Return the list of ViewHolders with this adapter.
+     */
     public ArrayList<ViewHolder> getHolders(){
         return holders;
     }
 
+    /**
+     * Stores references to the views for quick retrieval.
+     */
     public class ViewHolder{
+        /**
+         * The ReviewCharView to step through.
+         */
         public ReviewCharView reviewCharView;
+        /**
+         * The TextView to show the pronunciation.
+         */
         public TextView textView;
     }
 }

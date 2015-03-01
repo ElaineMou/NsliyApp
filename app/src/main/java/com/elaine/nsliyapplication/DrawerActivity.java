@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -60,6 +61,7 @@ public abstract class DrawerActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         if(actionBar!=null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
         }
@@ -89,6 +91,8 @@ public abstract class DrawerActivity extends Activity {
                     startActivity(intent);
                     finish();
                     overridePendingTransition(0,0);
+                } else {
+                    drawerLayout.closeDrawer(drawerList);
                 }
             }
         });

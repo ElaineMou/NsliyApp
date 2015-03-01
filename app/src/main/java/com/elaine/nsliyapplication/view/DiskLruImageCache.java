@@ -77,19 +77,6 @@ public class DiskLruImageCache {
         }
     }
 
-    private File getDiskCacheDir(Context context, String uniqueName) {
-
-        // Check if media is mounted or storage is built-in, if so, try and use external cache dir
-        // otherwise use internal cache dir
-        final String cachePath =
-                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                        !Utils.isExternalStorageRemovable() ?
-                        Utils.getExternalCacheDir(context).getPath() :
-                        context.getCacheDir().getPath();
-
-        return new File(cachePath + File.separator + uniqueName);
-    }
-
     /**
      * Places a bitmap in the cache.
      * @param key - Key used to access image

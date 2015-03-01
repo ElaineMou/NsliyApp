@@ -135,6 +135,11 @@ public class BitmapWorkerTask extends AsyncTask<File, Void, Bitmap> {
         return true;
     }
 
+    /**
+     * Returns the BitmapWorkerTask associated with the ImageView.
+     * @param imageView - ImageView to find the Task for.
+     * @return - The task associated with the ImageView
+     */
     public static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView){
         if(imageView!=null){
             final Drawable drawable = imageView.getDrawable();

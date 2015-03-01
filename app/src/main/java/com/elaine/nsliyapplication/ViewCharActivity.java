@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,8 +57,9 @@ public class ViewCharActivity extends DrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view);
+        setContentView(R.layout.activity_view_chars);
         super.onCreateDrawer();
+        setTitle(R.string.title_activity_view_chars);
 
         // Recover memory cache if previous instance existed
         RetainViewFragment retainViewFragment = RetainViewFragment
@@ -144,7 +144,6 @@ public class ViewCharActivity extends DrawerActivity {
                                 DrawActivity.PREFERENCES_FILE_KEY,MODE_PRIVATE);
                         String key = ((ImageAdapter)parent.getAdapter()).getFiles().get(position).getParentFile().getName();
                         int uses = sharedPreferences.getInt(key,0);
-                        Log.v("ViewActivity","Got " + key + "," + uses );
                         if( uses == 1){
                             builder.setMessage("One word contains this character.");
                         } else if (uses > 1){

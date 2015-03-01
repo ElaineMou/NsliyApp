@@ -11,7 +11,13 @@ import android.widget.Toast;
  * Created by Elaine on 1/4/2015.
  */
 public class SyllableSoundTask extends AsyncTask<String,Void,Boolean> {
+    /**
+     * MediaPlayer to play sounds.
+     */
     MediaPlayer mediaPlayer;
+    /**
+     * Context of the task.
+     */
     Context context;
 
     public SyllableSoundTask(Context context){

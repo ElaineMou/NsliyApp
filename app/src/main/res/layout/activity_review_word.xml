@@ -5,32 +5,56 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_gray">
+    android:background="@color/g400">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:background="@color/dark_green">
+        android:gravity="center_horizontal">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" >
+        </View>
         <Button
             android:id="@+id/back_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_media_rew"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="3" >
+        </View>
         <Button
             android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_media_previous"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="3" >
+        </View>
         <Button
             android:id="@+id/forward"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_media_next" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="3" >
+        </View>
         <Button
             android:id="@+id/forward_forward"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_media_ff" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" >
+        </View>
     </LinearLayout>
     <GridView
         android:id="@+id/chars_grid"
@@ -41,13 +65,13 @@
         android:numColumns="auto_fit"
         android:gravity="center_horizontal"
         android:verticalSpacing="@dimen/view_activity_spacing"
-        android:background="@color/pale_green"/>
+        android:background="@android:color/white"/>
     <TextView
         android:id="@+id/meaning_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/dark_green"
+        android:textColor="@color/g900"
         android:textSize="@dimen/data_entry_font_size"
         android:text="@string/meaning"/>
     <TextView
@@ -56,8 +80,9 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:gravity="center"
-        android:textColor="@color/dark_gray_text"
+        android:textColor="@color/g50"
         android:textSize="@dimen/data_entry_font_size"
+        android:maxLines="4"
+        android:scrollbars="vertical"
         android:text="@string/no_meaning"/>
-
 </LinearLayout>

@@ -5,7 +5,7 @@
     android:id="@id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/pale_green">
+    android:background="@color/g200">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -18,7 +18,7 @@
             android:horizontalSpacing="@dimen/view_activity_spacing"
             android:verticalSpacing="@dimen/view_activity_spacing"
             android:padding="@dimen/view_grid_margin"
-            android:background="@color/light_gray"
+            android:background="@android:color/white"
             xmlns:android="http://schemas.android.com/apk/res/android">
 
         </GridView>
@@ -29,7 +29,7 @@
             android:visibility="invisible"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g800"
             android:textSize="@dimen/data_entry_font_size"
             android:text="@string/empty_characters_message"
         />
@@ -40,8 +40,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
-        android:divider="@color/dark_green"
+        android:divider="@color/g800"
         android:dividerHeight="1dp"
-        android:background="@color/pale_green"/>
+        android:background="@color/g200"/>
 
 </android.support.v4.widget.DrawerLayout>

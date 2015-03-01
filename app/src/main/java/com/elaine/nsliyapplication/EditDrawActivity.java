@@ -1,10 +1,16 @@
 package com.elaine.nsliyapplication;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.elaine.nsliyapplication.input.DrawView;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
@@ -22,14 +28,48 @@ public class EditDrawActivity extends Activity {
 
     public static final String FILE_EXTRA_NAME = "fileName";
     public static final String DIRECTORY_RETURN_EXTRA = "directory";
-    File directory;
+    private File directory;
+    private float height=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         directory = new File(getIntent().getStringExtra(FILE_EXTRA_NAME));
         setContentView(R.layout.activity_draw);
+
+        ActionBar actionBar = getActionBar();
+        if(actionBar!=null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
+        }
         setResult(RESULT_CANCELED);
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        height = metrics.heightPixels - actionBar.getHeight();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawView drawView = (DrawView)findViewById(R.id.draw_view);
+        if(drawView.changed() && !drawView.isEmpty() ) {
+            AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_edit_dialog)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create();
+
+            quitDialog.show();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -46,12 +86,15 @@ public class EditDrawActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_revert) {
-            try {
-                ((DrawView) findViewById(R.id.draw_view)).loadFromDirectory(directory);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            View view = findViewById(R.id.draw_view);
+            if(view.getHeight() > 0.5*height) {
+                try {
+                    ((DrawView) findViewById(R.id.draw_view)).loadFromDirectory(directory);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ((SyllableEntryView) findViewById(R.id.pronunciation_view)).loadFromDirectory(directory);
             }
-            ( (SyllableEntryView) findViewById(R.id.pronunciation_view)).loadFromDirectory(directory);
             return true;
         } else if (id == R.id.action_undo){
             ( (DrawView) findViewById(R.id.draw_view) ).undo();

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/data_entry_padding"
-    android:background="@color/light_gray"
+    android:background="@color/g200"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true">
 
@@ -17,13 +17,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pronunciation_tag"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:textSize="@dimen/data_entry_font_size"/>
         <AutoCompleteTextView
             android:id="@+id/pronounce_field"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:maxLines="1"
             android:textSize="@dimen/data_entry_font_size"/>
     </LinearLayout>
 
@@ -31,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tone_tag"
-        android:textColor="@color/dark_green"
+        android:textColor="@color/g900"
         android:textSize="@dimen/data_entry_font_size"
     />
     <RadioGroup
@@ -44,42 +45,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/unknown_tone" />
         <RadioButton
             android:id="@+id/first_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/first_tone"/>
         <RadioButton
             android:id="@+id/second_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/second_tone"/>
         <RadioButton
             android:id="@+id/third_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/third_tone" />
         <RadioButton
             android:id="@+id/fourth_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/fourth_tone" />
         <RadioButton
             android:id="@+id/neutral_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tone_radio_font_size"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g900"
             android:text="@string/neutral_tone" />
     </RadioGroup>
 
@@ -106,7 +107,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:textSize="@dimen/data_entry_font_size"
-            android:textColor="@color/dark_green"
+            android:background="@drawable/button_selector"
+            android:textColor="@color/g50"
             android:text="@string/add_button"/>
     </RelativeLayout>
 </LinearLayout>

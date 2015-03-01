@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.elaine.nsliyapplication.R;
@@ -22,9 +21,6 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 /**
  * View that will step through characters stroke by stroke.
@@ -32,26 +28,58 @@ import java.util.Random;
  */
 public class ReviewCharView extends View {
 
+    /**
+     * Size in dp for all ReviewCharViews
+     */
     public static final int viewSize = 150;
 
     /**
      * File to source strokes from.
      */
     public File charFile=null;
+    /**
+     * Filters for only stroke images
+     */
     public static FilenameFilter filenameFilter;
+    /**
+     * List of files for the strokes in this character.
+     */
     private ArrayList<File> strokeFileList;
 
+    /**
+     * Stroke images for this view.
+     */
     private ArrayList<Bitmap> strokes = new ArrayList<Bitmap>();
+    /**
+     * Offsets from the full character display image's top left corner for the strokes.
+     */
     private ArrayList<Point> offsetsFromDisplay = new ArrayList<Point>();
 
+    /**
+     * The full display image for the complete character.
+     */
     private Bitmap displayImage;
+    /**
+     * Offset from (0,0) of the display image.
+     */
     private Point offSetOfDisplay;
 
+    /**
+     * Strokes already placed down on the view.
+     */
     private int strokesWritten = 0;
+    /**
+     * The canvas onto which images are drawn.
+     */
     private Canvas displayCanvas;
+    /**
+     * The bitmap updated through the display canvas.
+     */
     private Bitmap displayBitmap;
 
-    private int id;
+    /**
+     * Density value used for loading images.
+     */
     private float scale;
 
     public ReviewCharView(Context context){
@@ -62,7 +90,6 @@ public class ReviewCharView extends View {
     public ReviewCharView(Context context, AttributeSet attrs) {
         super(context,attrs);
         scale = context.getResources().getDisplayMetrics().density;
-        id = new Random().nextInt(100);
     }
 
     public ReviewCharView(Context context, AttributeSet attrs, int defStyle){
@@ -70,9 +97,14 @@ public class ReviewCharView extends View {
         scale = context.getResources().getDisplayMetrics().density;
     }
 
+    /**
+     * Loads stroke images from file.
+     * @param file
+     */
     public void init(File file){
         this.charFile = file;
 
+        // Sets filter to only accept PNGs with the stroke prefix.
         if (filenameFilter == null) {
             filenameFilter = new FilenameFilter() {
                 @Override
@@ -82,6 +114,7 @@ public class ReviewCharView extends View {
             };
         }
 
+        // Fills stroke files list with valid image files
         if(charFile!=null) {
             strokeFileList = new ArrayList<File>();
             String[] strokeFileNames = charFile.list(filenameFilter);
@@ -94,9 +127,12 @@ public class ReviewCharView extends View {
                 }
             }
         }
-        setBackgroundColor(getResources().getColor(R.color.cream));
+        setBackgroundColor(getResources().getColor(R.color.g50));
     }
 
+    /**
+     * Creates canvas if it is null or improperly sized, as long as width and height are greater than 0.
+     */
     public void makeCanvas(){
         int width = getWidth();
         int height = getHeight();
@@ -107,6 +143,10 @@ public class ReviewCharView extends View {
         }
     }
 
+    /**
+     * Loads images from the loaded file list.
+     * @throws JSONException
+     */
     public void loadValuesFromFile() throws JSONException {
         strokes.clear();
         offsetsFromDisplay.clear();
@@ -221,7 +261,6 @@ public class ReviewCharView extends View {
     }
 
     @Override
-
     protected void onDraw(Canvas canvas){
         if(displayBitmap !=null) {
             canvas.drawBitmap(displayBitmap, 0, 0, null);
@@ -264,6 +303,10 @@ public class ReviewCharView extends View {
         return false;
     }
 
+    /**
+     * Adds a stroke to the view and updates the strokesWritten value, unless already completely filled.
+     * @return - true if stroke is added, false if all strokes already added in.
+     */
     public boolean addStroke(){
         if(strokesWritten < strokes.size()) {
             displayCanvas.drawBitmap(strokes.get(strokesWritten),
@@ -276,6 +319,10 @@ public class ReviewCharView extends View {
         return false;
     }
 
+    /**
+     * Removes a stroke and updates strokesWritten, unless already empty.
+     * @return - true if stroke removed, false if already empty.
+     */
     public boolean removeStroke(){
         if(strokesWritten > 0) {
             displayBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);

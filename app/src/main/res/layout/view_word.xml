@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/view_grid_margin"
     android:layout_marginTop="@dimen/view_grid_margin"
-    android:background="@color/light_gray">
+    android:background="@color/g50"
+    android:padding="@dimen/view_word_padding">
     <HorizontalScrollView
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -38,9 +39,10 @@
             android:id="@+id/review_word_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
             android:textSize="@dimen/button_font_size"
             android:background="@drawable/button_selector"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g50"
             android:text="@string/view_button"/>
         <Button
             android:id="@+id/delete_word_button"
@@ -48,7 +50,7 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/button_font_size"
             android:background="@drawable/button_selector"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g50"
             android:text="@string/delete_button"/>
     </LinearLayout>
 </LinearLayout>

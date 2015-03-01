@@ -1,12 +1,18 @@
 package com.elaine.nsliyapplication;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +21,8 @@ import android.widget.TextView;
 
 import com.elaine.nsliyapplication.input.Pronunciation;
 import com.elaine.nsliyapplication.input.SyllableEntryView;
+import com.elaine.nsliyapplication.view.BitmapLruCache;
+import com.elaine.nsliyapplication.view.DiskLruImageCache;
 import com.elaine.nsliyapplication.words.ReviewAdapter;
 import com.elaine.nsliyapplication.words.ReviewCharView;
 
@@ -35,6 +43,23 @@ import java.util.ArrayList;
 public class ReviewWordActivity extends Activity {
 
     /**
+     * Memory cache to be used by this activity
+     */
+    private BitmapLruCache memoryCache;
+    /**
+     * Disk cache for images for this activity.
+     */
+    private DiskLruImageCache diskCache = new DiskLruImageCache();
+    /**
+     * Disk cache size (in bytes)
+     */
+    private static final int DISK_CACHE_SIZE = 1024*1024*10;
+    /**
+     * Subdirectory name for the disk cache
+     */
+    private static final String DISK_CACHE_SUBDIR = "reviewStrokes";
+
+    /**
      * Extras key for file to review.
      */
     public static final String EXTRAS_KEY_WORD_FILE = "wordFile";
@@ -53,9 +78,21 @@ public class ReviewWordActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review_word);
+        ActionBar actionBar = getActionBar();
+        if(actionBar!=null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
+        }
 
         wordFile = (File) getIntent().getSerializableExtra(EXTRAS_KEY_WORD_FILE);
         loadFromFile();
+
+        // TODO: USE CACHING TO FIX MEMORY ISSUES
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemory/8;
+        memoryCache = new BitmapLruCache(cacheSize);;
+        // Initialize new disk cache for activity
+        File cacheDir = getDiskCacheDir(this, DISK_CACHE_SUBDIR);
+        new InitDiskCacheTask().execute(cacheDir);
 
         Button button = (Button) findViewById(R.id.back_back);
         button.setOnTouchListener(new View.OnTouchListener() {
@@ -184,15 +221,67 @@ public class ReviewWordActivity extends Activity {
                 return true;
             }
         });
+    }
 
+    /**
+     * Initializes the disk cache off the main thread.
+     */
+    class InitDiskCacheTask extends AsyncTask<File,Void,Void> {
+        @Override
+        protected Void doInBackground(File... params){
+            synchronized(diskCache.mDiskCacheLock){
+                File cacheDir = params[0];
+                // Opens the disk cache in the given directory
+                diskCache.open(cacheDir, DISK_CACHE_SIZE);
+                // Notifies waiting objects once ready
+                diskCache.mDiskCacheStarting = false;
+                diskCache.mDiskCacheLock.notifyAll();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Return directory for the disk cache
+     * @param context - Context to be used
+     * @param uniqueName - Unique name for the file directory
+     * @return - The directory of the disk cache
+     */
+    private File getDiskCacheDir(Context context, String uniqueName) {
+        String cachePath = "";
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
+                !Environment.isExternalStorageRemovable()){
+            // Use external cache directory if possible
+            File externalCache = context.getExternalCacheDir();
+            if(externalCache!=null){
+                cachePath = externalCache.getPath();
+            }
+        } else {
+            // Otherwise use this context's cache directory
+            File cache = context.getCacheDir();
+            if(cache != null){
+                cachePath = cache.getPath();
+            }
+        }
+        // Return a new directory of the cache path plus the unique name provided
+        return new File(cachePath + File.separator + uniqueName);
+    }
+
+    @Override
+    protected void onDestroy(){
+        if(diskCache!=null){
+            diskCache.clearCache();
+        }
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        gridView = (GridView) findViewById(R.id.chars_grid);
-        reviewAdapter = new ReviewAdapter(this,characterFolders,pronunciations);
-        gridView.setAdapter(reviewAdapter);
+        if(gridView==null) {
+            gridView = (GridView) findViewById(R.id.chars_grid);
+            reviewAdapter = new ReviewAdapter(this, characterFolders, pronunciations);
+            gridView.setAdapter(reviewAdapter);
+        }
     }
 
     private void rewind(){
@@ -314,6 +403,7 @@ public class ReviewWordActivity extends Activity {
                     meaning = jsonMeaning;
                     TextView textView = (TextView) findViewById(R.id.meaning_text_view);
                     textView.setText(meaning);
+                    textView.setMovementMethod(new ScrollingMovementMethod());
                 }
             }
         }

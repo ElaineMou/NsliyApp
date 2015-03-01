@@ -4,8 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/pale_green">
+    android:layout_height="match_parent">
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -22,7 +21,7 @@
             android:paddingLeft="@dimen/view_grid_margin"
             android:paddingRight="@dimen/view_grid_margin"
             android:paddingBottom="0dp"
-            android:background="@color/light_gray"
+            android:background="@android:color/white"
             xmlns:android="http://schemas.android.com/apk/res/android">
 
         </GridView>
@@ -32,16 +31,18 @@
             android:layout_width="wrap_content"
             android:visibility="invisible"
             android:layout_centerInParent="true"
-            android:textColor="@color/dark_green"
+            android:textColor="@color/g800"
             android:textSize="@dimen/data_entry_font_size"
             android:text="@string/empty_characters_message"
             />
     </RelativeLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/g900"/>
     <com.elaine.nsliyapplication.words.BuildWordView
         android:id="@+id/build_word_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/menu_green"/>
+        android:layout_weight="1"/>
 </LinearLayout>

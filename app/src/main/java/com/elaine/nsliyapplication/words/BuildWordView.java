@@ -20,6 +20,9 @@ import com.elaine.nsliyapplication.ViewCharActivity;
  */
 public class BuildWordView extends FrameLayout {
 
+    /**
+     * Density scale for image loading.
+     */
     private float scale;
 
     public BuildWordView(Context context) {
@@ -37,6 +40,10 @@ public class BuildWordView extends FrameLayout {
         initView(context);
     }
 
+    /**
+     * Initializes View and sets scale value.
+     * @param context
+     */
     private void initView(Context context) {
         scale = context.getResources().getDisplayMetrics().density;
 
@@ -44,13 +51,17 @@ public class BuildWordView extends FrameLayout {
         addView(view);
     }
 
+    /**
+     * Adds a thumbnail image on a white background to the thumbnail series layout.
+     * @param drawable
+     */
     public void addThumbnail(Drawable drawable){
         Context context = getContext();
         FrameLayout imageFrame = new FrameLayout(context);
         int frameSize = (int) (ViewCharActivity.VIEW_IMAGE_SIZE*scale);
         imageFrame.setLayoutParams(new GridView.LayoutParams(frameSize, frameSize));
         imageFrame.setForegroundGravity(Gravity.CENTER);
-        imageFrame.setBackgroundColor(Color.LTGRAY);
+        imageFrame.setBackgroundColor(Color.WHITE);
 
         ImageView imageView = new ImageView(context);
         imageView.setImageDrawable(drawable);

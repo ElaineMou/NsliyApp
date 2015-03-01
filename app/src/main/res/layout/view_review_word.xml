@@ -10,8 +10,9 @@
         android:layout_height="wrap_content"/>
     <TextView
         android:id="@+id/pronunciation_text_view"
-        android:background="@color/pale_green"
-        android:textColor="@color/dark_green"
-        android:layout_width="@dimen/review_char_width"
+        android:background="@color/g200"
+        android:textColor="@color/g800"
+        android:gravity="center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

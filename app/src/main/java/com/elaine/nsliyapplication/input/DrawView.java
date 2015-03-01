@@ -10,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -149,7 +148,20 @@ public class DrawView extends View {
      */
     private final RectF rectToUpdate = new RectF();
 
+    /**
+     * If this character was loaded from file to edit.
+     */
     private boolean haveLoadedFromDirectory = false;
+
+    /**
+     * If this character has changed since being loaded from the file.
+     */
+    private boolean changed = false;
+
+    /**
+     * Number of additions to loaded character. -1 if stroke removed or cleared.
+     */
+    private int changesMade = 0;
 
     public DrawView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -161,7 +173,7 @@ public class DrawView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeWidth(5f);
 
-        setBackgroundColor(context.getResources().getColor(R.color.cream));
+        setBackgroundColor(context.getResources().getColor(R.color.g50));
 
         redPaint = new Paint(paint);
         redPaint.setColor(Color.RED);
@@ -189,6 +201,9 @@ public class DrawView extends View {
         offsetsFromCorner.clear();
         characterBounds = null;
         strokeBounds.clear();
+
+        changed = true;
+        changesMade = -1;
         invalidate();
     }
 
@@ -354,6 +369,12 @@ public class DrawView extends View {
                             strokes.add(newStroke);
                             offsetsFromCorner.add(new Point(lastStroke.left,lastStroke.top));
                             currentStroke = null;
+
+                            if(changesMade >= 0){
+                                changesMade++;
+                            }
+                            changed = true;
+
                             // Expand character bounds to include this event
                             expandRectWithRect(characterBounds, lastStroke);
                             invalidate();
@@ -468,28 +489,40 @@ public class DrawView extends View {
         return false;
     }
 
+    /**
+     * Returns a number for the directory name.
+     * @param context - Provided context.
+     * @return - Number to append to the file name.
+     */
     public static int generateDirectoryNumber(Context context){
+        // Retrieve last integer used in this application.
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 DrawActivity.PREFERENCES_FILE_KEY,Context.MODE_PRIVATE);
         int n = sharedPreferences.getInt(PREFS_KEY_LAST_CHAR_NUM,0);
 
         String directoryName;
         File directory;
+        int currentValue;
 
-        // Guarantee a unique folder for new character
+        // Guarantee a unique folder for new character by incrementing number
         do {
             n++;
             directoryName = CHARACTER_PREFIX + n;
             directory = new File(context.getExternalFilesDir(
                     Environment.DIRECTORY_PICTURES), directoryName);
-        } while (directory.exists());
 
+            currentValue = sharedPreferences.getInt(directoryName, 0);
+        } while (directory.exists() || currentValue > 0);
+        // Save newest number as the last.
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(PREFS_KEY_LAST_CHAR_NUM,n).commit();
 
         return n;
     }
 
+    /**
+     * Remove most recent stroke from view.
+     */
     public void undo() {
         // If any set is empty, clear all data of previous strokes.
         if(strokes.isEmpty() || strokeBounds.isEmpty() || offsetsFromCorner.isEmpty()){
@@ -499,12 +532,22 @@ public class DrawView extends View {
             strokes.clear();
             strokeBounds.clear();
             offsetsFromCorner.clear();
+
+            changed = true;
+            changesMade = -1;
         } else {
             //Remove last stroke from memory
             strokes.remove(strokes.size() - 1);
             strokeBounds.remove(strokeBounds.size() - 1);
             offsetsFromCorner.remove(offsetsFromCorner.size() - 1);
             touchPoints.clear();
+
+            if(changesMade >= 0){
+                changesMade--;
+                if(changesMade == 0){
+                    changed = false;
+                }
+            }
 
             // If any set is newly empty, clear all data of previous strokes.
             if (strokes.isEmpty() || strokeBounds.isEmpty() || offsetsFromCorner.isEmpty()) {
@@ -514,6 +557,8 @@ public class DrawView extends View {
                 strokes.clear();
                 strokeBounds.clear();
                 offsetsFromCorner.clear();
+                changed = true;
+                changesMade = -1;
             } else { // If there are still strokes on the screen
                 // Recreate displayBitmap with transparency, new canvas to draw onto displayBitmap with.
                 displayBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
@@ -534,7 +579,6 @@ public class DrawView extends View {
     }
 
     /**
-     *
      * Saves current character and strokes to file.
      * @param context - Activity passed in to get directory
      */
@@ -643,7 +687,6 @@ public class DrawView extends View {
                 if(!editing) {
                     SharedPreferences.Editor editor = context.getSharedPreferences
                             (DrawActivity.PREFERENCES_FILE_KEY, Context.MODE_PRIVATE).edit();
-                    Log.v("DrawView", "Put: " + directory.getName() + "," + 0);
                     editor.putInt(directory.getName(), 0).commit();
                     editor.putInt(PREFS_KEY_LAST_CHAR_NUM,newCharNum).commit();
                 }
@@ -686,6 +729,11 @@ public class DrawView extends View {
         setMeasuredDimension(width,height);
     }
 
+    /**
+     * Load strokes from file into the view.
+     * @param directory - the folder from which the strokes are loaded.
+     * @throws JSONException
+     */
     public void loadFromDirectory(File directory) throws JSONException {
         clear();
         if(displayBitmap == null) {
@@ -811,5 +859,21 @@ public class DrawView extends View {
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Returns if there are no strokes on the view.
+     * @return - If view is empty.
+     */
+    public boolean isEmpty(){
+        return strokes.isEmpty();
+    }
+
+    /**
+     * Returns if view has been changed since loading from file.
+     * @return - If view is different from file-loaded character.
+     */
+    public boolean changed(){
+        return changed;
     }
 }

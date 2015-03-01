@@ -1,6 +1,7 @@
 package com.elaine.nsliyapplication.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Gravity;
@@ -21,27 +22,53 @@ import java.util.ArrayList;
  */
 public class ImageAdapter extends BaseAdapter {
 
+    /**
+     * The context for this adapter.
+     */
     private Context context;
+    /**
+     * Resources to pull values from.
+     */
+    private Resources resources;
+    /**
+     * Files to display characters from.
+     */
     private ArrayList<File> files;
+    /**
+     * Bitmap used when image is still loading.
+     */
     public static Bitmap placeHolderBitmap;
+    /**
+     * Density scale for image loading.
+     */
     private final float scale;
+    /**
+     * Disk cache for images.
+     */
     private DiskLruImageCache diskCache;
+    /**
+     * In-memory cache for images.
+     */
     private BitmapLruCache memoryCache;
+    /**
+     * Color value for the image background.
+     */
     private int backgroundColorId;
 
     public ImageAdapter(Context context, ArrayList<File> files, BitmapLruCache lruCache,
                         DiskLruImageCache diskLruImageCache){
         this.context = context;
+        this.resources = context.getResources();
         this.files = files;
 
         if(placeHolderBitmap==null){
             placeHolderBitmap = BitmapFactory.
-                    decodeResource(context.getResources(), R.drawable.sandglass);
+                    decodeResource(resources, R.drawable.sandglass);
         }
-        scale = context.getResources().getDisplayMetrics().density;
+        scale = resources.getDisplayMetrics().density;
         this.memoryCache = lruCache;
         this.diskCache = diskLruImageCache;
-        backgroundColorId = context.getResources().getColor(R.color.cream);
+        backgroundColorId = resources.getColor(R.color.g50);
     }
 
     @Override
@@ -62,24 +89,44 @@ public class ImageAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         FrameLayout imageFrame;
+        FrameLayout imageBorder;
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
-            imageFrame = new FrameLayout(context);
+            // Create dark green border
+            imageBorder = new FrameLayout(context);
+            int frameWidth = (int) resources.getDimension(R.dimen.char_thumb_padding);
+            imageBorder.setPadding(frameWidth,frameWidth,frameWidth,frameWidth);
             int frameSize = (int) (ViewCharActivity.VIEW_IMAGE_SIZE*scale);
-            imageFrame.setLayoutParams(new GridView.LayoutParams(frameSize,frameSize));
+            imageBorder.setLayoutParams(new GridView.LayoutParams(frameSize, frameSize));
+            imageBorder.setBackgroundColor(resources.getColor(R.color.g800));
+
+            // Create light green background
+            imageFrame = new FrameLayout(context);
             imageFrame.setForegroundGravity(Gravity.CENTER);
+            imageFrame.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
             imageFrame.setBackgroundColor(backgroundColorId);
+
+            imageBorder.addView(imageFrame);
         } else {
-            imageFrame = (FrameLayout) convertView;
+            // Retrieve old border and background and clear the character from it.
+            imageBorder = (FrameLayout) convertView;
+            imageFrame = (FrameLayout) imageBorder.getChildAt(0);
             imageFrame.removeAllViews();
         }
+        // Load character into the background.
         ImageView imageView = new ImageView(context);
         loadBitmap(files.get(position), imageView);
         imageFrame.addView(imageView);
 
-        return imageFrame;
+        return imageBorder;
     }
 
+    /**
+     * Load imageView with thumbnail-size character using an AsyncTask.
+     * @param file
+     * @param imageView
+     */
     public void loadBitmap(File file, ImageView imageView) {
         final String imageKey = file.getParentFile().getName();
         final Bitmap bitmap = memoryCache.get(imageKey);
@@ -90,7 +137,7 @@ public class ImageAdapter extends BaseAdapter {
                 final BitmapWorkerTask task = new BitmapWorkerTask(imageView,
                         (int) (scale * ViewCharActivity.VIEW_IMAGE_SIZE),
                         (int) (scale * ViewCharActivity.VIEW_IMAGE_SIZE), memoryCache, diskCache);
-                final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(),
+                final AsyncDrawable asyncDrawable = new AsyncDrawable(resources,
                         placeHolderBitmap, task);
                 imageView.setImageDrawable(asyncDrawable);
                 task.execute(file);
@@ -99,6 +146,11 @@ public class ImageAdapter extends BaseAdapter {
 
     }
 
+    /**
+     * Remove the file from the given position, file system, and the memory and disk caches.
+     * @param position
+     * @return - If the file was successfully deleted from the file system.
+     */
     public boolean remove(int position){
         // Get character directory
         File directory = files.get(position).getParentFile();
@@ -119,10 +171,18 @@ public class ImageAdapter extends BaseAdapter {
         return directory.delete();
     }
 
+    /**
+     * Returns the list of files associated with the adapter.
+     * @return - The files used for the adapter.
+     */
     public ArrayList<File> getFiles(){
         return files;
     }
 
+    /**
+     * If the file list is empty.
+     * @return - If the file list for this adapter is empty.
+     */
     public boolean filesEmpty(){
         return files.isEmpty();
     }

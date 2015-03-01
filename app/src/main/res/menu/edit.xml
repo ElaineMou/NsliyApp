@@ -2,15 +2,12 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_revert"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:title="@string/action_revert"
         android:showAsAction="always" />
     <item android:id="@+id/action_undo"
-        android:icon="@android:drawable/ic_menu_revert"
         android:title="@string/action_undo"
         android:showAsAction="always" />
     <item android:id="@+id/action_save"
-        android:icon="@android:drawable/ic_menu_save"
         android:title="@string/action_save"
         android:showAsAction="always" />
 </menu>

@@ -1,6 +1,10 @@
 package com.elaine.nsliyapplication;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +25,10 @@ public class DrawActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
+        ActionBar actionBar = getActionBar();
+        if(actionBar!=null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
+        }
     }
 
     @Override
@@ -28,6 +36,29 @@ public class DrawActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.draw, menu);
         return true;
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if(!((DrawView)findViewById(R.id.draw_view)).isEmpty()) {
+            AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_draw_dialog)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create();
+
+            quitDialog.show();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

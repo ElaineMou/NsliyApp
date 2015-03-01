@@ -1,6 +1,7 @@
 package com.elaine.nsliyapplication.input;
 
 import android.content.Context;
+import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.elaine.nsliyapplication.EditDrawActivity;
 import com.elaine.nsliyapplication.R;
@@ -77,6 +79,7 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                 view.findViewById(R.id.pronounce_field);
         autoCompleteTextView.setAdapter(adapter);
         autoCompleteTextView.setThreshold(1);
+        autoCompleteTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
         autoCompleteTextView.setOnItemClickListener(this);
 
         // Initialize radio group to Unknown tone
@@ -160,6 +163,8 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
                         GridView gridView = (GridView) findViewById(R.id.pronunciation_series);
                         ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
                     }
+                } else {
+                    Toast.makeText(getContext(), R.string.maxed_pronuns,Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -198,6 +203,10 @@ public class SyllableEntryView extends FrameLayout implements AdapterView.OnItem
         }
     }
 
+    /**
+     * Load Pronunciations from file.
+     * @param directory - File to source pronunciations from.
+     */
     public void loadFromDirectory(File directory) {
         pronunciations = Pronunciation.getListFromDirectory(directory);
         Pronunciation.PronunciationAdapter pronunciationAdapter =

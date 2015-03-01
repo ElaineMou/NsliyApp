@@ -12,7 +12,6 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ViewCharActivity"
-            android:label="@string/title_activity_view_chars"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,9 +22,6 @@
             android:name=".ViewWordActivity"
             android:label="@string/title_activity_view_words"
             android:launchMode="singleTop">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainMenuActivity"/>
         </activity>
         <activity
             android:name=".CreateWordActivity"

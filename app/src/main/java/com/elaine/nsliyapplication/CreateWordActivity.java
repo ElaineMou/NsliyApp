@@ -1,16 +1,18 @@
 package com.elaine.nsliyapplication;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,6 +93,11 @@ public class CreateWordActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
 
+        ActionBar actionBar = getActionBar();
+        if(actionBar!=null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
+        }
+
         // Recover memory cache if previous instance existed
         RetainViewFragment retainViewFragment = RetainViewFragment
                 .findOrCreateRetainFragment(getFragmentManager());
@@ -107,6 +114,28 @@ public class CreateWordActivity extends Activity {
         new InitDiskCacheTask().execute(cacheDir);
 
         scale = getResources().getDisplayMetrics().density;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(!keys.isEmpty()) {
+            AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_word_dialog)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create();
+
+            quitDialog.show();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     /**
@@ -165,7 +194,7 @@ public class CreateWordActivity extends Activity {
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    addCharacter(((ImageView) ((FrameLayout)view).getChildAt(0)).getDrawable(),
+                    addCharacter(((ImageView) ((FrameLayout)((FrameLayout)view).getChildAt(0)).getChildAt(0)).getDrawable(),
                             ((ImageAdapter) parent.getAdapter()).getFiles().get(position)
                                     .getParentFile());
                 }
@@ -271,7 +300,6 @@ public class CreateWordActivity extends Activity {
             for (String string : stringHashSet) {
                 int currentValue = sharedPreferences.getInt(string, 0);
                 editor.putInt(string, currentValue + 1);
-                Log.v("CreateWordActivity", "Put " + string + "," + (currentValue + 1));
             }
             editor.commit();
         }
@@ -329,8 +357,9 @@ public class CreateWordActivity extends Activity {
                 (int)(ViewCharActivity.VIEW_IMAGE_SIZE*scale - 10), LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(5, 5, 5, 5);
         textView.setLayoutParams(params);
-        textView.setBackgroundColor(resources.getColor(R.color.pale_green));
-        textView.setTextColor(resources.getColor(R.color.dark_green));
+        textView.setGravity(Gravity.CENTER);
+        textView.setBackgroundColor(resources.getColor(R.color.g50));
+        textView.setTextColor(resources.getColor(R.color.g800));
 
         if(pronunciation!=null) {
             textView.setText(pronunciation.syllable + " " + pronunciation.tone);
