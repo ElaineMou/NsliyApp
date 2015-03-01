@@ -35,6 +35,9 @@ public class ViewCharActivity extends DrawerActivity {
      * Size (in dp) of image thumbnails (square)
      */
     public static final int VIEW_IMAGE_SIZE = 90;
+    /**
+     * Request code for opening an editing activity.
+     */
     public static final int EDIT_CHAR_REQUEST = 1;
 
     /**
@@ -140,6 +143,7 @@ public class ViewCharActivity extends DrawerActivity {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ViewCharActivity.this);
                         builder.setTitle(R.string.delete_character_dialog);
 
+                        // Notify user that character is used in existing words.
                         SharedPreferences sharedPreferences = getSharedPreferences(
                                 DrawActivity.PREFERENCES_FILE_KEY,MODE_PRIVATE);
                         String key = ((ImageAdapter)parent.getAdapter()).getFiles().get(position).getParentFile().getName();
@@ -192,7 +196,9 @@ public class ViewCharActivity extends DrawerActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        // If returning from editing a character successfully.
         if(resultCode==RESULT_OK && requestCode == EDIT_CHAR_REQUEST){
+            // Remove the relevant directory name key from cache to update it before display
             String directory = data.getStringExtra(EditDrawActivity.DIRECTORY_RETURN_EXTRA);
             memoryCache.remove(directory);
             diskCache.remove(directory);
@@ -212,7 +218,7 @@ public class ViewCharActivity extends DrawerActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_add) {
+        if (id == R.id.action_add) { // Start activity for a new character
             Intent intent = new Intent(this,DrawActivity.class);
             startActivity(intent);
             return true;
@@ -238,6 +244,10 @@ public class ViewCharActivity extends DrawerActivity {
         }
     }
 
+    /**
+     * Returns the disk cache associated with this activity
+     * @return - The disk cache relevant to this activity.
+     */
     public DiskLruImageCache getDiskCache(){
         return diskCache;
     }

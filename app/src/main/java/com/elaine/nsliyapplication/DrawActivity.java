@@ -17,14 +17,21 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Activity used to enter character for the first time.
+ */
 public class DrawActivity extends Activity {
 
+    /**
+     * Key used to access shared preferences for character usage numbers
+     */
     public static final String PREFERENCES_FILE_KEY = "preferencesKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
+        // Set ActionBar color
         ActionBar actionBar = getActionBar();
         if(actionBar!=null) {
             actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
@@ -38,9 +45,9 @@ public class DrawActivity extends Activity {
         return true;
     }
 
-
     @Override
     public void onBackPressed() {
+        // If there are strokes on the screen, prompt before actually quitting
         if(!((DrawView)findViewById(R.id.draw_view)).isEmpty()) {
             AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_draw_dialog)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -67,12 +74,12 @@ public class DrawActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_clear) {
+        if (id == R.id.action_clear) { // Clear the drawing view of strokes
             ( (DrawView) findViewById(R.id.draw_view) ).clear();
             return true;
-        } else if (id == R.id.action_undo){
+        } else if (id == R.id.action_undo){ // Remove the most recent stroke from the screen
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
-        } else if (id == R.id.action_save){
+        } else if (id == R.id.action_save){ // Save the character images and pronunciations to a new folder
             File directory = null;
             try {
                 directory = ( (DrawView) findViewById(R.id.draw_view ) ).saveCharacter(this, null);

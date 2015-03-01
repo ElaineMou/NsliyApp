@@ -56,10 +56,25 @@ public class CreateWordActivity extends Activity {
      * String to be shown when a word has no known pronunciations.
      */
     public static final String DEFAULT_UNKNOWN_STRING = "????";
+    /**
+     * Prefix for word directory names.
+     */
     public static final String WORD_PREFIX = "word";
+    /**
+     * JSON key for characters list
+     */
     public static final String JSON_KEY_CHARACTERS = "characters";
+    /**
+     * JSON key for pronunciations list
+     */
     public static final String JSON_KEY_PRONUNCIATIONS = "pronunciations";
+    /**
+     * JSON key for the meaning
+     */
     public static final String JSON_KEY_MEANING = "meaning";
+    /**
+     * File type for JSON storage.
+     */
     public static final String TEXT_FILE_TYPE = ".txt";
     /**
      * Memory cache to be used by this activity
@@ -86,6 +101,9 @@ public class CreateWordActivity extends Activity {
      */
     private static final String DISK_CACHE_SUBDIR = "thumbnails";
 
+    /**
+     * Density value for loading images.
+     */
     private float scale;
 
     @Override
@@ -93,6 +111,7 @@ public class CreateWordActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
 
+        // Set action bar color to green
         ActionBar actionBar = getActionBar();
         if(actionBar!=null) {
             actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
@@ -118,6 +137,7 @@ public class CreateWordActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        // If word is not empty, check if user wants to leave
         if(!keys.isEmpty()) {
             AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_word_dialog)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -215,20 +235,20 @@ public class CreateWordActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_clear) {
+        if (id == R.id.action_clear) { // clear list
             ((LinearLayout)findViewById(R.id.thumbnail_series)).removeAllViews();
             ((LinearLayout)findViewById(R.id.pronunciation_series)).removeAllViews();
             keys.clear();
             savedPronunciations.clear();
             return true;
-        } else if (id == R.id.action_undo){
+        } else if (id == R.id.action_undo){ // remove most recent
             LinearLayout linearLayout = ((LinearLayout)findViewById(R.id.thumbnail_series));
             linearLayout.removeViewAt(linearLayout.getChildCount() - 1);
             linearLayout = ((LinearLayout)findViewById(R.id.pronunciation_series));
             linearLayout.removeViewAt(linearLayout.getChildCount() - 1);
             keys.remove(keys.size() - 1);
             savedPronunciations.remove(savedPronunciations.size() - 1);
-        } else if (id == R.id.action_save){
+        } else if (id == R.id.action_save){ // Save to file
             try {
                 saveToFile();
             } catch (JSONException e) {
@@ -241,6 +261,10 @@ public class CreateWordActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Generates a unique word directory name to save to.
+     * @return - A uniquely named file folder to store word information in.
+     */
     private File generateFileName(){
         int n=0;
         Random random = new Random();
@@ -257,6 +281,11 @@ public class CreateWordActivity extends Activity {
         return file;
     }
 
+    /**
+     * Saves word information to a new directory in the file system.
+     * @throws JSONException
+     * @throws IOException
+     */
     private void saveToFile() throws JSONException, IOException {
         if(savedPronunciations!=null) {
             File file = generateFileName();
@@ -266,6 +295,7 @@ public class CreateWordActivity extends Activity {
             for (String key : keys) {
                 characterNames.put(key);
             }
+            // Place pronunciations into string arrays in JSON
             JSONArray pronunciations = new JSONArray();
             for (Pronunciation pronunciation : savedPronunciations) {
                 if (pronunciation != null) {
@@ -276,13 +306,14 @@ public class CreateWordActivity extends Activity {
                             + Pronunciation.Tone.UNKNOWN.toString());
                 }
             }
-
+            // Save meaning to key
             String meaning = ((EditText) findViewById(R.id.meaning_edit_text)).getText().toString();
 
             jsonObject.put(JSON_KEY_CHARACTERS, characterNames);
             jsonObject.put(JSON_KEY_PRONUNCIATIONS, pronunciations);
             jsonObject.put(JSON_KEY_MEANING, meaning);
 
+            // Write to file
             FileWriter fileWriter = new FileWriter(file);
             try {
                 fileWriter.write(jsonObject.toString());
@@ -293,6 +324,7 @@ public class CreateWordActivity extends Activity {
                 fileWriter.close();
             }
 
+            // Update usage of the characters in the preferences file
             HashSet<String> stringHashSet = new HashSet<String>();
             stringHashSet.addAll(keys);
             SharedPreferences sharedPreferences = getSharedPreferences(DrawActivity.PREFERENCES_FILE_KEY, MODE_PRIVATE);
@@ -305,11 +337,18 @@ public class CreateWordActivity extends Activity {
         }
     }
 
+    /**
+     * Add a new character to the building word with the correct pronunciation.
+     * @param image - the image used to display in series
+     * @param directory - The directory from which to source pronunciations
+     */
     public void addCharacter(final Drawable image, final File directory){
         final ArrayList<Pronunciation> possiblePronunciations = Pronunciation.getListFromDirectory(directory);
         int size = possiblePronunciations.size();
         Pronunciation pronunciation = null;
+        // If multiple pronunciations are available
         if(size > 1){
+            // Present options for user to choose from in dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             View dialogView = getLayoutInflater().inflate(R.layout.dialog_spinner, null);
             builder.setView(dialogView);
@@ -324,6 +363,7 @@ public class CreateWordActivity extends Activity {
                     android.R.layout.simple_dropdown_item_1line,strings);
             spinner.setAdapter(arrayAdapter);
 
+            // Allow user to cancel addition midway, or move on to actually adding them
             builder.setTitle(R.string.select_pronunciation_message)
                     .setPositiveButton(R.string.use, new DialogInterface.OnClickListener() {
                         @Override
@@ -341,18 +381,27 @@ public class CreateWordActivity extends Activity {
                     );
             builder.create().show();
         } else{
+            // If only one pronunciation available
             if (size == 1) {
                 pronunciation = possiblePronunciations.get(0);
             }
+            // Add character with the given pronunciation
             addCharacterToViews(pronunciation,image,directory);
         }
 
     }
 
+    /**
+     * Add character to growing list with the associated pronunciation and image
+     * @param pronunciation - Pronunciation to be added on.
+     * @param image - Image to be shown to the user
+     * @param directory - Directory to source information from
+     */
     public void addCharacterToViews(Pronunciation pronunciation, Drawable image, File directory){
         TextView textView = new TextView(this);
         Resources resources = getResources();
 
+        // Pad TextView and center text inside it, set colors
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 (int)(ViewCharActivity.VIEW_IMAGE_SIZE*scale - 10), LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(5, 5, 5, 5);
@@ -361,6 +410,7 @@ public class CreateWordActivity extends Activity {
         textView.setBackgroundColor(resources.getColor(R.color.g50));
         textView.setTextColor(resources.getColor(R.color.g800));
 
+        // Set text to pronunciation values, otherwise load default string
         if(pronunciation!=null) {
             textView.setText(pronunciation.syllable + " " + pronunciation.tone);
         } else {
@@ -368,6 +418,7 @@ public class CreateWordActivity extends Activity {
         }
         ((LinearLayout) findViewById(R.id.pronunciation_series)).addView(textView);
 
+        // Save character directory name to keys, add pronunciation to growing list, add image
         keys.add(directory.getName());
         savedPronunciations.add(pronunciation);
         ((BuildWordView) findViewById(R.id.build_word_view)).addThumbnail(image);
@@ -390,9 +441,4 @@ public class CreateWordActivity extends Activity {
             return null;
         }
     }
-
-    public DiskLruImageCache getDiskCache(){
-        return diskCache;
-    }
-
 }

@@ -3,7 +3,6 @@ package com.elaine.nsliyapplication;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
@@ -64,14 +63,35 @@ public class ReviewWordActivity extends Activity {
      */
     public static final String EXTRAS_KEY_WORD_FILE = "wordFile";
 
+    /**
+     * Word file to review information from.
+     */
     private File wordFile = null;
+    /**
+     * Character folders to reference in this word.
+     */
     ArrayList<File> characterFolders = new ArrayList<File>();
+    /**
+     * Pronunciations to display on screen.
+     */
     ArrayList<Pronunciation> pronunciations = new ArrayList<Pronunciation>();
+    /**
+     * Meaning to be shown to user.
+     */
     String meaning;
 
+    /**
+     * Current character the user is working through.
+     */
     private int currentChar = 0;
 
+    /**
+     * The adapter set to the display grid view.
+     */
     private ReviewAdapter reviewAdapter = null;
+    /**
+     * The GridView to display all ReviewCharViews in series.
+     */
     private GridView gridView = null;
 
     @Override
@@ -83,17 +103,19 @@ public class ReviewWordActivity extends Activity {
             actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
         }
 
+        // Get directory from intent, fill values accordingly
         wordFile = (File) getIntent().getSerializableExtra(EXTRAS_KEY_WORD_FILE);
         loadFromFile();
 
         // TODO: USE CACHING TO FIX MEMORY ISSUES
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory/8;
-        memoryCache = new BitmapLruCache(cacheSize);;
+        memoryCache = new BitmapLruCache(cacheSize);
         // Initialize new disk cache for activity
         File cacheDir = getDiskCacheDir(this, DISK_CACHE_SUBDIR);
         new InitDiskCacheTask().execute(cacheDir);
 
+        // Create buttons and set functions to darken on click and enact functions
         Button button = (Button) findViewById(R.id.back_back);
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -270,6 +292,7 @@ public class ReviewWordActivity extends Activity {
     @Override
     protected void onDestroy(){
         if(diskCache!=null){
+            // Empty disk cache before closing
             diskCache.clearCache();
         }
     }
@@ -278,12 +301,16 @@ public class ReviewWordActivity extends Activity {
     protected void onResume(){
         super.onResume();
         if(gridView==null) {
+            // Fill GridView if it is empty
             gridView = (GridView) findViewById(R.id.chars_grid);
             reviewAdapter = new ReviewAdapter(this, characterFolders, pronunciations);
             gridView.setAdapter(reviewAdapter);
         }
     }
 
+    /**
+     * Empty current character; if already empty, clear previous character.
+     */
     private void rewind(){
         boolean cleared = getReviewer(currentChar).clear();
         if(!cleared && currentChar > 0){
@@ -292,6 +319,9 @@ public class ReviewWordActivity extends Activity {
         }
     }
 
+    /**
+     * Remove most recent stroke in current character; if already empty, remove one from previous.
+     */
     private void previous(){
         boolean removed = getReviewer(currentChar).removeStroke();
         if(!removed && currentChar > 0){
@@ -300,6 +330,9 @@ public class ReviewWordActivity extends Activity {
         }
     }
 
+    /**
+     * Add stroke to current character; if already full, add stroke to next character
+     */
     private void next(){
         boolean added = getReviewer(currentChar).addStroke();
         if(!added && currentChar < reviewAdapter.getHolders().size() - 1){
@@ -308,6 +341,9 @@ public class ReviewWordActivity extends Activity {
         }
     }
 
+    /**
+     * Fill current character; if already full, fill next character
+     */
     private void fastForward(){
         boolean filled = getReviewer(currentChar).drawChar();
         if(!filled && currentChar < reviewAdapter.getHolders().size() - 1){
@@ -316,10 +352,18 @@ public class ReviewWordActivity extends Activity {
         }
     }
 
+    /**
+     * Gets the ReviewCharView being displayed at the given index
+     * @param position - position in the list
+     * @return - ReviewCharView at the position in the list
+     */
     private ReviewCharView getReviewer(int position){
         return reviewAdapter.getHolders().get(position).reviewCharView;
     }
 
+    /**
+     * Loads ReviewCharViews with appropriate character files from the word directory
+     */
     protected void loadFromFile(){
         if(wordFile.exists()) {
             BufferedReader bufferedReader = null;
@@ -353,6 +397,7 @@ public class ReviewWordActivity extends Activity {
                 JSONArray jsonPronunciations = null;
                 String jsonMeaning = null;
 
+                // Load JSON string from file
                 try {
                     jsonObject = new JSONObject(stringBuilder.toString());
                     jsonChars = jsonObject.getJSONArray(CreateWordActivity.JSON_KEY_CHARACTERS);
@@ -362,6 +407,7 @@ public class ReviewWordActivity extends Activity {
                     e.printStackTrace();
                 }
                 if(jsonChars !=null) {
+                    // Add character folders to list, add null if no longer existing
                     int length = jsonChars.length();
                     for (int i = 0; i < length; i++) {
                         String characterFolder = "";
@@ -378,6 +424,7 @@ public class ReviewWordActivity extends Activity {
                         }
                     }
                 }
+                // Add pronunciations to list from JSON string array
                 if(jsonPronunciations !=null){
                     int length = jsonPronunciations.length();
                     for(int i=0;i<length;i++) {
@@ -399,6 +446,7 @@ public class ReviewWordActivity extends Activity {
                         }
                     }
                 }
+                // Display meaning if available
                 if(jsonMeaning !=null && !jsonMeaning.isEmpty()){
                     meaning = jsonMeaning;
                     TextView textView = (TextView) findViewById(R.id.meaning_text_view);

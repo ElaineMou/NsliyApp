@@ -26,9 +26,21 @@ import java.io.IOException;
  */
 public class EditDrawActivity extends Activity {
 
+    /**
+     * Extra key in intents for file name to be loading from.
+     */
     public static final String FILE_EXTRA_NAME = "fileName";
+    /**
+     * Extra key in intent to return to the ViewCharActivity with the relevant directory name
+     */
     public static final String DIRECTORY_RETURN_EXTRA = "directory";
+    /**
+     * The file directory loading the character to edit from.
+     */
     private File directory;
+    /**
+     * The height of the screen
+     */
     private float height=0;
 
     @Override
@@ -37,21 +49,28 @@ public class EditDrawActivity extends Activity {
         directory = new File(getIntent().getStringExtra(FILE_EXTRA_NAME));
         setContentView(R.layout.activity_draw);
 
+        // Set ActionBar color
         ActionBar actionBar = getActionBar();
         if(actionBar!=null) {
             actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.g700)));
         }
+        // Set default result to cancelled
         setResult(RESULT_CANCELED);
 
+        // Set height to metrics given upon opening screen
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        height = metrics.heightPixels - actionBar.getHeight();
+        height = metrics.heightPixels;
+        if(actionBar!=null){
+            height -= actionBar.getHeight();
+        }
     }
 
     @Override
     public void onBackPressed() {
         DrawView drawView = (DrawView)findViewById(R.id.draw_view);
+        // If changes have been made to the drawing view, prompt user before leaving.
         if(drawView.changed() && !drawView.isEmpty() ) {
             AlertDialog quitDialog = new AlertDialog.Builder(this).setMessage(R.string.quit_edit_dialog)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -85,7 +104,7 @@ public class EditDrawActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_revert) {
+        if (id == R.id.action_revert) { // If keyboard is not up, reload screen from file
             View view = findViewById(R.id.draw_view);
             if(view.getHeight() > 0.5*height) {
                 try {
@@ -96,9 +115,9 @@ public class EditDrawActivity extends Activity {
                 ((SyllableEntryView) findViewById(R.id.pronunciation_view)).loadFromDirectory(directory);
             }
             return true;
-        } else if (id == R.id.action_undo){
+        } else if (id == R.id.action_undo){ // Remove most recent stroke from screen
             ( (DrawView) findViewById(R.id.draw_view) ).undo();
-        } else if (id == R.id.action_save){
+        } else if (id == R.id.action_save){ // Save character images and pronunciations to file
             if(directory!=null){
                 File save = null;
                 try {
@@ -111,6 +130,7 @@ public class EditDrawActivity extends Activity {
                 if(save!=null) {
                     ((SyllableEntryView) findViewById(R.id.pronunciation_view)).saveSyllables(directory);
 
+                    // return to previous activity with notification of which directory was modified
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra(DIRECTORY_RETURN_EXTRA, directory.getName());
                     setResult(RESULT_OK, returnIntent);
@@ -121,6 +141,10 @@ public class EditDrawActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Returns the directory associated with this editing activity.
+     * @return - The directory being modified
+     */
     public File getDirectory(){
         return directory;
     }
